@@ -6,11 +6,12 @@ import { v } from "convex/values";
 import { getAllEntries, getAllManagedEntries } from "./lib/contentstack/retrieve.js";
 import { createEntry, updateEntry, publishEntry, unpublishEntry, deleteEntry } from "./lib/contentstack/update.js";
 import { config } from "./lib/config.js";
-import { getAllSphereContents } from "./lib/sphere/retrieve.js";
+import { getAllSphereContents, getSphereContentByUUID } from "./lib/sphere/retrieve.js";
 import { mapSphereToBlogPost } from "./lib/sphere/blogPostMapper.js";
 import { getNestedValue, setNestedValue } from "./lib/utils.js";
 import { localeValidator } from "./lib/locales";
 import allSportIdsData from "./lib/fedid/all_sport_ids.json" with { type: "json" };
+import ukSportsCategoriesData from "./lib/sphere/uk-sports-categories.json" with { type: "json" };
 
 /**
  * Check the sync state between a Sphere content type and a ContentStack content type.
@@ -421,5 +422,189 @@ export const massFieldUpdate = action({
     console.log(`=========================\n`);
 
     return { summary: { total: entries.length, updated: updated.length, failed: failed.length }, failed };
+  },
+});
+
+type UKSportsCategory = {
+  name: string;
+  url: string;
+  sphereId: string;
+  taxonomy: string;
+  articleIds?: string[];
+};
+
+/**
+ * For every article sphere ID listed in uk-sports-categories.json, ensure it exists
+ * in ContentStack as a blog_post with the correct sport_category taxonomy term.
+ *
+ * - If the entry **exists**: adds any missing taxonomy terms (merge only, never removes).
+ * - If the entry **does not exist**: fetches the full Sphere content, maps it via
+ *   mapSphereToBlogPost (dd_sports taxonomies included), merges the UK-category
+ *   taxonomy, creates the entry, then publishes.
+ * - After any create or update the entry is published immediately.
+ * - Set `dryRun: true` to audit without writing anything.
+ *
+ * @example
+ * await api.sync.syncUKCategoryTaxonomies({
+ *   locale: "en-GB",
+ *   dryRun: false,
+ * })
+ */
+export const syncUKCategoryTaxonomies = action({
+  args: {
+    locale: localeValidator,
+    dryRun: v.optional(v.boolean()),
+  },
+
+  handler: async (_ctx, args) => {
+    const { locale, dryRun = false } = args;
+    const { environment } = config.contentstack;
+    const TAXONOMY_UID = "sport_category";
+
+    const categories = ukSportsCategoriesData as UKSportsCategory[];
+
+    // --- Phase 1: build article-id → required taxonomy terms index ---
+    // One article can appear in several categories → union of all their taxonomies.
+    const articleTaxonomies = new Map<string, Set<string>>();
+    for (const cat of categories) {
+      for (const articleId of cat.articleIds ?? []) {
+        const existing = articleTaxonomies.get(articleId) ?? new Set<string>();
+        existing.add(cat.taxonomy);
+        articleTaxonomies.set(articleId, existing);
+      }
+    }
+    const allArticleIds = [...articleTaxonomies.keys()];
+
+    console.log(`\n=== Sync UK Category Taxonomies ===`);
+    console.log(`  Locale        : ${locale}`);
+    console.log(`  Dry run       : ${dryRun}`);
+    console.log(`  Unique article IDs : ${allArticleIds.length}`);
+
+    // --- Phase 2: fetch CS snapshot indexed by sphere_id ---
+    const csEntries = await getAllManagedEntries("blog_post", { locale });
+    const csMap = new Map<string, Record<string, unknown>>();
+    for (const entry of csEntries) {
+      const sid = entry["sphere_id"];
+      if (typeof sid === "string") csMap.set(sid, entry as Record<string, unknown>);
+    }
+    console.log(`  CS entries fetched : ${csEntries.length} (${csMap.size} with sphere_id)`);
+
+    const publishParams = {
+      environments: [environment],
+      locales: [locale],
+    };
+
+    type FailedItem = { sphereId: string; step: string; error: string };
+    const created: string[] = [];
+    const updated: string[] = [];
+    const skipped: string[] = [];
+    const failed: FailedItem[] = [];
+
+    // --- Phase 3: process each article ---
+    for (const [sphereArticleId, requiredTerms] of articleTaxonomies) {
+      try {
+        const csEntry = csMap.get(sphereArticleId);
+
+        if (csEntry) {
+          // --- Entry exists: check for missing taxonomy terms ---
+          const existingTaxonomies = (csEntry["taxonomies"] ?? []) as Array<{
+            taxonomy_uid: string;
+            term_uid: string;
+          }>;
+          const existingTerms = new Set(
+            existingTaxonomies
+              .filter((t) => t.taxonomy_uid === TAXONOMY_UID)
+              .map((t) => t.term_uid)
+          );
+
+          const missingTerms = [...requiredTerms].filter((t) => !existingTerms.has(t));
+          if (missingTerms.length === 0) {
+            skipped.push(sphereArticleId);
+            continue;
+          }
+
+          if (dryRun) {
+            updated.push(sphereArticleId);
+            continue;
+          }
+
+          // Merge: keep existing taxonomies, append missing ones
+          const mergedTaxonomies = [
+            ...existingTaxonomies,
+            ...missingTerms.map((term_uid) => ({ taxonomy_uid: TAXONOMY_UID, term_uid })),
+          ];
+
+          // Strip read-only CS metadata fields — ContentStack rejects them on PUT
+          const CS_READONLY_FIELDS = new Set([
+            "uid", "ACL", "_version", "locale", "created_at", "updated_at",
+            "created_by", "updated_by", "_in_progress", "publish_details",
+          ]);
+          const entryUid = csEntry["uid"] as string;
+          const cleanEntry = Object.fromEntries(
+            Object.entries(csEntry).filter(([k]) => !CS_READONLY_FIELDS.has(k))
+          );
+          await updateEntry(
+            "blog_post",
+            entryUid,
+            { entry: { ...cleanEntry, taxonomies: mergedTaxonomies } },
+            locale
+          );
+          await publishEntry("blog_post", entryUid, publishParams, locale);
+          updated.push(sphereArticleId);
+        } else {
+          // --- Entry does not exist: fetch from Sphere and create ---
+          if (dryRun) {
+            created.push(sphereArticleId);
+            continue;
+          }
+
+          const sphereContent = await getSphereContentByUUID(sphereArticleId);
+          const mapped = mapSphereToBlogPost(sphereContent);
+
+          // Merge dd_sports-derived taxonomies with UK-category taxonomies
+          const ddSportsTaxonomies = (mapped["taxonomies"] ?? []) as Array<{
+            taxonomy_uid: string;
+            term_uid: string;
+          }>;
+          const ddSportsTerms = new Set(ddSportsTaxonomies.map((t) => t.term_uid));
+          const extraTerms = [...requiredTerms].filter((t) => !ddSportsTerms.has(t));
+          const finalTaxonomies = [
+            ...ddSportsTaxonomies,
+            ...extraTerms.map((term_uid) => ({ taxonomy_uid: TAXONOMY_UID, term_uid })),
+          ];
+
+          const newEntry = await createEntry(
+            "blog_post",
+            { ...mapped, taxonomies: finalTaxonomies },
+            locale
+          );
+          await publishEntry("blog_post", newEntry.uid, publishParams, locale);
+          created.push(sphereArticleId);
+        }
+      } catch (err) {
+        const error = err instanceof Error ? err.message : String(err);
+        const step = csMap.has(sphereArticleId) ? "update" : "create";
+        failed.push({ sphereId: sphereArticleId, step, error });
+        console.error(`  ✗ [${step}] ${sphereArticleId}: ${error}`);
+      }
+    }
+
+    const summary = {
+      total: allArticleIds.length,
+      created: created.length,
+      updated: updated.length,
+      skipped: skipped.length,
+      failed: failed.length,
+    };
+
+    console.log(`\n  Results (dryRun=${dryRun}):`);
+    console.log(`  ✅ Created : ${summary.created}`);
+    console.log(`  🔄 Updated : ${summary.updated}`);
+    console.log(`  ⏭  Skipped : ${summary.skipped}`);
+    console.log(`  ✗  Failed  : ${summary.failed}`);
+    console.log(`  env=${environment}`);
+    console.log(`====================================\n`);
+
+    return { summary, params: { locale, dryRun }, failed };
   },
 });
