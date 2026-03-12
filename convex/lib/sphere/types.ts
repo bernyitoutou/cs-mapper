@@ -1,21 +1,17 @@
 export type SphereContent = {
-  uuid: string;
+  id: string;
   title: string;
-  content_type_id: string;
-  status: number;
-  locale: string;
+  content_type?: string;
+  status?: number;
+  locale?: string;
   model_codes?: string[];
-  created_at: string;
-  updated_at: string;
-  body: Record<string, unknown>;
   [key: string]: unknown;
 };
 
+/** Hydra collection response returned by GET /contents */
 export type SphereListResponse = {
-  items: SphereContent[];
-  total: number;
-  page: number;
-  per_page: number;
+  "hydra:totalItems": number;
+  "hydra:member": SphereContent[];
 };
 
 export type SphereContentTypeDefinition = {

@@ -35,21 +35,15 @@ export const checkSyncStatus = action({
     csMatchField: v.string(),
     /** Locale filter applied to both sides. e.g. "fr-FR" */
     locale: localeValidator,
-    /**
-     * Sphere publication status filter.
-     * 1 = published (default), 0 = draft
-     */
-    sphereStatus: v.optional(v.number()),
   },
 
   handler: async (_ctx, args) => {
-    const sphereStatus = (args.sphereStatus ?? 1) as 0 | 1;
 
     // 1. Fetch all published Sphere items
     const sphereItems = await getAllSphereContents({
       contentTypeId: args.sphereContentTypeId,
       locale: args.locale,
-      status: sphereStatus,
+      status: 1, // published only
     });
 
     // 2. Fetch all published CS entries (Delivery API)
@@ -95,7 +89,7 @@ export const checkSyncStatus = action({
       params: {
         sphereContentTypeId: args.sphereContentTypeId,
         sphereMatchField: args.sphereMatchField,
-        sphereStatus,
+        sphereStatus: 1, // published only
         csContentTypeUid: args.csContentTypeUid,
         csMatchField: args.csMatchField,
         locale: args.locale ?? "all",

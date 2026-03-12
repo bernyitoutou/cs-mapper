@@ -12,7 +12,7 @@ import type {
   GetEntryResponse,
 } from "./types.js";
 
-const CS_MAX_LIMIT = 250;
+const CS_MAX_LIMIT = 100;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -24,7 +24,7 @@ function buildEntrySearchParams(params: GetEntriesParams): Record<string, string
   if (params.locale) p["locale"] = params.locale.toLowerCase();
 
   p["include_all"] = "true";
-  p["include_all_depth"] = String(Math.min(params.includeDepth ?? 5, 5));
+  if (params.includeDepth) p["depth"] = String(Math.min(params.includeDepth, 5));
 
   if (params.query) p["query"] = params.query;
   if (params.orderBy) {

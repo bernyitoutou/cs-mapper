@@ -19,7 +19,8 @@ export const config = {
     managementToken: require("CS_MANAGEMENT_TOKEN"),
     environment: require("CS_ENVIRONMENT"),
     branch: optional("CS_BRANCH") ?? "main",
-    host: require("CS_HOST").replace(/\/$/, ""),
+    deliveryHost: require("CS_DELIVERY_HOST").replace(/\/$/, ""),
+    managementHost: require("CS_MANAGEMENT_HOST").replace(/\/$/, ""),
   },
   sphere: {
     host: require("SPHERE_HOST").replace(/\/$/, ""),

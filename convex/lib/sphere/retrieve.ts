@@ -67,7 +67,7 @@ export async function getSphereContentsByModelCode(
   params: Omit<SphereSearchParams, "modelCodes" | "contentTypeId"> = {}
 ): Promise<SphereContent[]> {
   const result = await searchSphereContents({ ...params, modelCodes, contentTypeId });
-  return result.items;
+  return result["hydra:member"];
 }
 
 /**
@@ -84,9 +84,9 @@ export async function getAllSphereContents(
 
   while (true) {
     const result = await searchSphereContents({ ...params, page, perPage: DEFAULT_PER_PAGE });
-    collected.push(...result.items);
-    const totalPages = Math.ceil(result.total / result.per_page);
-    if (page >= totalPages || result.items.length === 0) break;
+    const members = result["hydra:member"];
+    collected.push(...members);
+    if (members.length === 0 || collected.length >= result["hydra:totalItems"]) break;
     page++;
   }
 

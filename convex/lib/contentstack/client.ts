@@ -43,8 +43,8 @@ export async function deliveryGet<T>(
   path: string,
   searchParams: Record<string, string> = {}
 ): Promise<T> {
-  const { host, apiKey, deliveryToken, branch } = config.contentstack;
-  const url = new URL(`${host}/v3${path}`);
+  const { deliveryHost, apiKey, deliveryToken, branch } = config.contentstack;
+  const url = new URL(`${deliveryHost}/v3${path}`);
   for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
 
   const res = await fetch(url.toString(), {
@@ -67,8 +67,8 @@ export async function managementGet<T>(
   path: string,
   searchParams: Record<string, string> = {}
 ): Promise<T> {
-  const { host, apiKey, managementToken, branch } = config.contentstack;
-  const url = new URL(`${host}/v3${path}`);
+  const { managementHost, apiKey, managementToken, branch } = config.contentstack;
+  const url = new URL(`${managementHost}/v3${path}`);
   for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
 
   const res = await fetch(url.toString(), {
@@ -84,8 +84,8 @@ export async function managementGet<T>(
 }
 
 export async function managementPut<T>(path: string, body: unknown): Promise<T> {
-  const { host, apiKey, managementToken, branch } = config.contentstack;
-  const url = new URL(`${host}/v3${path}`);
+  const { managementHost, apiKey, managementToken, branch } = config.contentstack;
+  const url = new URL(`${managementHost}/v3${path}`);
 
   const res = await fetch(url.toString(), {
     method: "PUT",
@@ -105,8 +105,8 @@ export async function managementPost<T>(
   body: unknown,
   searchParams: Record<string, string> = {}
 ): Promise<T> {
-  const { host, apiKey, managementToken, branch } = config.contentstack;
-  const url = new URL(`${host}/v3${path}`);
+  const { managementHost, apiKey, managementToken, branch } = config.contentstack;
+  const url = new URL(`${managementHost}/v3${path}`);
   for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
 
   const res = await fetch(url.toString(), {
@@ -123,8 +123,8 @@ export async function managementPost<T>(
 }
 
 export async function managementDelete<T>(path: string): Promise<T> {
-  const { host, apiKey, managementToken, branch } = config.contentstack;
-  const url = new URL(`${host}/v3${path}`);
+  const { managementHost, apiKey, managementToken, branch } = config.contentstack;
+  const url = new URL(`${managementHost}/v3${path}`);
 
   const res = await fetch(url.toString(), {
     method: "DELETE",
