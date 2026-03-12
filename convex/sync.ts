@@ -5,8 +5,9 @@ import { v } from "convex/values";
 
 import { getAllEntries, getAllManagedEntries } from "./lib/contentstack/retrieve.js";
 import { createEntry, updateEntry, publishEntry, unpublishEntry, deleteEntry } from "./lib/contentstack/update.js";
+import { ContentstackError } from "./lib/contentstack/client.js";
 import { config } from "./lib/config.js";
-import { getAllSphereContents, getSphereContentByUUID } from "./lib/sphere/retrieve.js";
+import { getAllSphereContents, getSphereContentByUUID, getSphereContentFromHTML } from "./lib/sphere/retrieve.js";
 import { mapSphereToBlogPost } from "./lib/sphere/blogPostMapper.js";
 import { getNestedValue, setNestedValue } from "./lib/utils.js";
 import { localeValidator } from "./lib/locales";
@@ -534,19 +535,14 @@ export const syncUKCategoryTaxonomies = action({
             ...missingTerms.map((term_uid) => ({ taxonomy_uid: TAXONOMY_UID, term_uid })),
           ];
 
-          // Strip read-only CS metadata fields — ContentStack rejects them on PUT
-          const CS_READONLY_FIELDS = new Set([
-            "uid", "ACL", "_version", "locale", "created_at", "updated_at",
-            "created_by", "updated_by", "_in_progress", "publish_details",
-          ]);
+          // Send only the taxonomies field — CS Management PUT supports partial
+          // updates and sending the full entry round-trips expanded reference
+          // fields (from include_all=true) that CS rejects on write (error 121).
           const entryUid = csEntry["uid"] as string;
-          const cleanEntry = Object.fromEntries(
-            Object.entries(csEntry).filter(([k]) => !CS_READONLY_FIELDS.has(k))
-          );
           await updateEntry(
             "blog_post",
             entryUid,
-            { entry: { ...cleanEntry, taxonomies: mergedTaxonomies } },
+            { entry: { taxonomies: mergedTaxonomies } },
             locale
           );
           await publishEntry("blog_post", entryUid, publishParams, locale);
@@ -558,7 +554,14 @@ export const syncUKCategoryTaxonomies = action({
             continue;
           }
 
-          const sphereContent = await getSphereContentByUUID(sphereArticleId);
+          // Fetch from Sphere: try JSON API first, fall back to HTML renderer
+          let sphereContent;
+          try {
+            sphereContent = await getSphereContentByUUID(sphereArticleId);
+          } catch (apiErr) {
+            console.warn(`  ↩ Sphere API failed (${apiErr instanceof Error ? apiErr.message : apiErr}), using HTML renderer for ${sphereArticleId}`);
+            sphereContent = await getSphereContentFromHTML(sphereArticleId);
+          }
           const mapped = mapSphereToBlogPost(sphereContent);
 
           // Merge dd_sports-derived taxonomies with UK-category taxonomies
@@ -584,8 +587,11 @@ export const syncUKCategoryTaxonomies = action({
       } catch (err) {
         const error = err instanceof Error ? err.message : String(err);
         const step = csMap.has(sphereArticleId) ? "update" : "create";
+        const details = err instanceof ContentstackError && err.errors
+          ? ` | details: ${JSON.stringify(err.errors)}`
+          : "";
         failed.push({ sphereId: sphereArticleId, step, error });
-        console.error(`  ✗ [${step}] ${sphereArticleId}: ${error}`);
+        console.error(`  ✗ [${step}] ${sphereArticleId}: ${error}${details}`);
       }
     }
 

@@ -316,7 +316,7 @@
     "name": "Dance",
     "url": "/c/lp/all-dance-articles-decathlon_00cc0b9e-912a-44a7-a70c-849e55119139",
     "sphereId": "00cc0b9e-912a-44a7-a70c-849e55119139",
-    "taxonomy": "dance",
+    "taxonomy": "dances",
     "articleIds": [
       "12f9ee9f-8fa3-4ea3-adc1-23413ade726e",
       "035b93b8-9c2c-48ea-9e8d-f6b445577512",
@@ -436,7 +436,7 @@
     "name": "Gym & Fitness",
     "url": "/c/lp/all-gym-and-fitness-articles-decathlon_f736b36a-76fc-4de3-b495-fd2a58fdc2e0",
     "sphereId": "f736b36a-76fc-4de3-b495-fd2a58fdc2e0",
-    "taxonomy": "gym-and-fitness",
+    "taxonomy": "fitness",
     "articleIds": [
       "abd651ec-5be5-497f-a23a-602aa2c18a95",
       "3b03d497-120a-4df1-92d4-691f2b943408",
@@ -622,7 +622,7 @@
     "name": "Martial Arts",
     "url": "/c/lp/all-martial-arts-articles-decathlon_0d375915-df28-458f-948e-1ec2dec89087",
     "sphereId": "0d375915-df28-458f-948e-1ec2dec89087",
-    "taxonomy": "martial-arts",
+    "taxonomy": "mixed-martial-arts",
     "articleIds": [
       "848a03ed-4a52-42e3-a6a6-a758348b1378",
       "cbb99e35-66f0-4492-aff6-663cfd60cb74",
@@ -633,7 +633,7 @@
     "name": "Mountain bikes",
     "url": "/c/lp/all-mountain-bikes-articles-decathlon_6bfe3a30-8c5c-4aa2-ba09-2f47ffe78d75",
     "sphereId": "6bfe3a30-8c5c-4aa2-ba09-2f47ffe78d75",
-    "taxonomy": "mountain-bikes",
+    "taxonomy": "mountain-biking",
     "articleIds": [
       "81a30469-c6d1-48d7-8014-2eee23b34b82",
       "d8ef330e-8320-4e24-9a53-13408703dcf7",
@@ -890,7 +890,7 @@
     "name": "Sledging",
     "url": "/c/lp/all-sledging-articles-decathlon_13b1621e-f45c-43d8-9ec7-1fa74c2f8c8f",
     "sphereId": "13b1621e-f45c-43d8-9ec7-1fa74c2f8c8f",
-    "taxonomy": "sledging",
+    "taxonomy": "sledding",
     "articleIds": [
       "a21b6e45-aa1e-45ec-8745-3415fae269a1"
     ]
