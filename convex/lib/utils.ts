@@ -16,3 +16,29 @@ export function getNestedValue(obj: unknown, path: string): unknown {
     return undefined;
   }, obj);
 }
+
+/**
+ * Set a value at a dot-notation path on an object, creating intermediate objects as needed.
+ * Returns the mutated object.
+ *
+ * @example
+ * setNestedValue({ metadata: {} }, "metadata.title", "Hello")
+ * // → { metadata: { title: "Hello" } }
+ */
+export function setNestedValue(
+  obj: Record<string, unknown>,
+  path: string,
+  value: unknown
+): Record<string, unknown> {
+  const keys = path.split(".");
+  let current: Record<string, unknown> = obj;
+  for (let i = 0; i < keys.length - 1; i++) {
+    const key = keys[i];
+    if (current[key] == null || typeof current[key] !== "object") {
+      current[key] = {};
+    }
+    current = current[key] as Record<string, unknown>;
+  }
+  current[keys[keys.length - 1]] = value;
+  return obj;
+}

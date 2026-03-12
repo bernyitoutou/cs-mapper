@@ -22,6 +22,7 @@ import type * as lib_fedid_retrieve from "../lib/fedid/retrieve.js";
 import type * as lib_fedid_sportGroupLookup from "../lib/fedid/sportGroupLookup.js";
 import type * as lib_fedid_types from "../lib/fedid/types.js";
 import type * as lib_locales from "../lib/locales.js";
+import type * as lib_sphere_blogPostMapper from "../lib/sphere/blogPostMapper.js";
 import type * as lib_sphere_client from "../lib/sphere/client.js";
 import type * as lib_sphere_retrieve from "../lib/sphere/retrieve.js";
 import type * as lib_sphere_types from "../lib/sphere/types.js";
@@ -50,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   "lib/fedid/sportGroupLookup": typeof lib_fedid_sportGroupLookup;
   "lib/fedid/types": typeof lib_fedid_types;
   "lib/locales": typeof lib_locales;
+  "lib/sphere/blogPostMapper": typeof lib_sphere_blogPostMapper;
   "lib/sphere/client": typeof lib_sphere_client;
   "lib/sphere/retrieve": typeof lib_sphere_retrieve;
   "lib/sphere/types": typeof lib_sphere_types;

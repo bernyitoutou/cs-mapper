@@ -7,7 +7,11 @@
     "env:staging": "node scripts/set-convex-env.mjs staging",
     "env:production": "node scripts/set-convex-env.mjs production",
     "generate:sport-mapping": "tsx scripts/generateSportGroupMapping.ts --env .env.staging",
-    "generate:sport-mapping:prod": "tsx scripts/generateSportGroupMapping.ts --env .env.production"
+    "generate:sport-mapping:prod": "tsx scripts/generateSportGroupMapping.ts --env .env.production",
+    "test:sphere-renderer": "tsx scripts/testSphereRenderer.ts",
+    "scrape:uk-articles": "tsx scripts/scrapeUKSportsArticles.ts",
+    "generate:sport-article-mapping": "tsx scripts/generateSportArticleMapping.ts",
+    "generate:sport-article-mapping:prod": "tsx scripts/generateSportArticleMapping.ts --env .env.production"
   },
   "keywords": [],
   "author": "",

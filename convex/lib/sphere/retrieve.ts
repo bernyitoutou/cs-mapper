@@ -20,6 +20,7 @@ function buildSearchParams(params: SphereSearchParams): Record<string, string> {
   if (params.status != null) p["status"] = String(params.status);
   if (params.page != null) p["page"] = String(params.page);
   if (params.perPage != null) p["per_page"] = String(params.perPage);
+  if (params.ddSports?.length) p["dd_sports"] = params.ddSports.join(",");
   return p;
 }
 

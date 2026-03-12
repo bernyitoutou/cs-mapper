@@ -62,3 +62,20 @@ export async function spherePut<T>(path: string, body: unknown): Promise<T> {
   });
   return handleResponse<T>(res);
 }
+
+/**
+ * Fetch the rendered HTML of a Sphere content page by its UUID.
+ *
+ * Uses the Sphere content renderer service (SPHERE_RENDERER_URL).
+ * https://github.com/dktunited/sphere-content-renderer#by-uuid
+ *
+ * @param uuid - Sphere content UUID
+ */
+export async function getContentHTMLByUUID(uuid: string): Promise<string> {
+  const url = `${config.sphere.rendererUrl}/content/${uuid}`;
+  const res = await fetch(url, { method: "GET" });
+  if (!res.ok) {
+    throw new SphereError(res.status, `Renderer failed for UUID ${uuid}: ${res.statusText}`);
+  }
+  return res.text();
+}

@@ -1,3 +1,11 @@
+export type SphereTeaserImage = {
+  media_id: string;
+  security_key: string;
+  alt_title?: string;
+  type?: string;
+  [key: string]: unknown;
+};
+
 export type SphereContent = {
   id: string;
   title: string;
@@ -5,6 +13,12 @@ export type SphereContent = {
   status?: number;
   locale?: string;
   model_codes?: string[];
+  dd_sports?: number[];
+  summary?: string;
+  meta_description?: string;
+  teaser_image?: SphereTeaserImage;
+  updated_at?: string;
+  url?: string;
   [key: string]: unknown;
 };
 
@@ -32,6 +46,8 @@ export type SphereSearchParams = {
   status?: 0 | 1;
   page?: number;
   perPage?: number;
+  /** Filter by Decathlon sport IDs (dd_sports) */
+  ddSports?: number[];
 };
 
 export type SphereApiError = {

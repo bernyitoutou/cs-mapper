@@ -32,6 +32,7 @@ export const config = {
       host: require("SPHERE_HOST").replace(/\/$/, ""),
       apiKey: require("SPHERE_API_KEY"),
       pixlHost: optional("SPHERE_PIXL_HOST")?.replace(/\/$/, ""),
+      rendererUrl: require("SPHERE_RENDERER_URL").replace(/\/$/, ""),
       contentTypesIds: (() => {
         const raw = optional("SPHERE_CONTENT_TYPES_IDS");
         if (!raw) return {} as Record<string, string>;
