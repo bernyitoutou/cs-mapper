@@ -83,9 +83,14 @@ export async function managementGet<T>(
   return handleResponse<T>(res);
 }
 
-export async function managementPut<T>(path: string, body: unknown): Promise<T> {
+export async function managementPut<T>(
+  path: string,
+  body: unknown,
+  searchParams: Record<string, string> = {}
+): Promise<T> {
   const { managementHost, apiKey, managementToken, branch } = config.contentstack;
   const url = new URL(`${managementHost}/v3${path}`);
+  for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
 
   const res = await fetch(url.toString(), {
     method: "PUT",

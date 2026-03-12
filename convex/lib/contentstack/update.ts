@@ -1,5 +1,5 @@
 import { config } from "../config.js";
-import { managementPost, managementPut } from "./client.js";
+import { managementDelete, managementPost, managementPut } from "./client.js";
 import type {
   BulkPublishParams,
   BulkUpdateParams,
@@ -12,6 +12,42 @@ import type {
 // ---------------------------------------------------------------------------
 // Single-entry operations
 // ---------------------------------------------------------------------------
+
+/**
+ * Permanently delete an entry from ContentStack.
+ *
+ * - No `locale`: deletes the master entry (and all its localized variants).
+ * - With `locale`: deletes only that localized variant, leaving the master intact.
+ *
+ * Use as rollback when a subsequent step (localize, publish) fails.
+ */
+export async function deleteEntry(
+  contentTypeUid: string,
+  entryUid: string,
+  locale?: string
+): Promise<void> {
+  const sp: Record<string, string> = {};
+  if (locale) sp["locale"] = locale.toLowerCase();
+
+  const path = `/content_types/${contentTypeUid}/entries/${entryUid}`;
+  // managementDelete doesn't support searchParams — build URL manually
+  const { managementHost, apiKey, managementToken, branch } = config.contentstack;
+  const url = new URL(`${managementHost}/v3${path}`);
+  for (const [k, v] of Object.entries(sp)) url.searchParams.set(k, v);
+
+  const res = await fetch(url.toString(), {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      api_key: apiKey,
+      authorization: managementToken,
+      branch,
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`[${res.status}] Failed to delete entry ${entryUid}${locale ? ` (locale: ${locale})` : ""}`);
+  }
+}
 
 /**
  * Update an entry's fields.
@@ -36,9 +72,38 @@ export async function updateEntry<
 
   const data = await managementPut<GetEntryResponse<T>>(
     `/content_types/${contentTypeUid}/entries/${entryUid}`,
-    payload
+    payload,
+    sp
   );
   return data.entry;
+}
+
+/**
+ * Create a new entry in ContentStack.
+ *
+ * If `locale` is omitted the entry is created as a master (language-agnostic).
+ * Pass a locale to create directly in that locale.
+ *
+ * @example
+ * const entry = await createEntry("blog_post", { title: "Hello", body: "..." });
+ * const localized = await createEntry("blog_post", { title: "Bonjour" }, "fr-FR");
+ */
+export async function createEntry<
+  T extends Record<string, unknown> = Record<string, unknown>,
+>(
+  contentTypeUid: string,
+  data: Record<string, unknown>,
+  locale?: string
+): Promise<Entry<T>> {
+  const sp: Record<string, string> = {};
+  if (locale) sp["locale"] = locale.toLowerCase();
+
+  const response = await managementPost<GetEntryResponse<T>>(
+    `/content_types/${contentTypeUid}/entries`,
+    { entry: data },
+    sp
+  );
+  return response.entry;
 }
 
 /**
@@ -56,17 +121,23 @@ export async function publishEntry(
   params: PublishEntryParams = {
     environments: [config.contentstack.environment],
     locales: ["en-US"],
-  }
+  },
+  /** When set, publish is scoped to that locale (required for localized entries). */
+  locale?: string
 ): Promise<void> {
+  const sp: Record<string, string> = {};
+  if (locale) sp["locale"] = locale.toLowerCase();
+
   await managementPost(
     `/content_types/${contentTypeUid}/entries/${entryUid}/publish`,
     {
       entry: {
         environments: params.environments,
-        locales: params.locales,
+        locales: params.locales.map((l) => l.toLowerCase()),
         ...(params.scheduledAt ? { scheduled_at: params.scheduledAt } : {}),
       },
-    }
+    },
+    sp
   );
 }
 
@@ -84,7 +155,7 @@ export async function unpublishEntry(
     {
       entry: {
         environments: params.environments,
-        locales: params.locales,
+        locales: params.locales.map((l) => l.toLowerCase()),
         ...(params.scheduledAt ? { scheduled_at: params.scheduledAt } : {}),
       },
     }

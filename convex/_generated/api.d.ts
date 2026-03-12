@@ -9,6 +9,7 @@
  */
 
 import type * as contentstack from "../contentstack.js";
+import type * as import_ from "../import.js";
 import type * as lib_config from "../lib/config.js";
 import type * as lib_contentstack_client from "../lib/contentstack/client.js";
 import type * as lib_contentstack_retrieve from "../lib/contentstack/retrieve.js";
@@ -30,6 +31,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   contentstack: typeof contentstack;
+  import: typeof import_;
   "lib/config": typeof lib_config;
   "lib/contentstack/client": typeof lib_contentstack_client;
   "lib/contentstack/retrieve": typeof lib_contentstack_retrieve;
