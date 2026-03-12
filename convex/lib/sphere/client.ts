@@ -28,7 +28,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 function baseHeaders(): Record<string, string> {
   return {
     "Content-Type": "application/json",
-    apikey: config.sphere.apiKey,
+    "x-api-key": config.sphere.apiKey,
   };
 }
 

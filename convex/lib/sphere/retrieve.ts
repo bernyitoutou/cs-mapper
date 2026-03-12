@@ -46,7 +46,7 @@ export async function searchSphereContents(
   params: SphereSearchParams = {}
 ): Promise<SphereListResponse> {
   return sphereGet<SphereListResponse>(
-    "/contents/search",
+    "/contents",
     buildSearchParams({ perPage: DEFAULT_PER_PAGE, ...params })
   );
 }

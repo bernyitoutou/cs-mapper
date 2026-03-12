@@ -6,6 +6,7 @@ import { v } from "convex/values";
 import { getAllEntries } from "./lib/contentstack/retrieve.js";
 import { getAllSphereContents } from "./lib/sphere/retrieve.js";
 import { getNestedValue } from "./lib/utils.js";
+import { localeValidator } from "./lib/locales";
 
 /**
  * Check the sync state between a Sphere content type and a ContentStack content type.
@@ -33,7 +34,7 @@ export const checkSyncStatus = action({
     /** Dot-notation path to extract the match key from a CS entry. e.g. "sphere_id", "uid" */
     csMatchField: v.string(),
     /** Locale filter applied to both sides. e.g. "fr-FR" */
-    locale: v.optional(v.string()),
+    locale: localeValidator,
     /**
      * Sphere publication status filter.
      * 1 = published (default), 0 = draft
