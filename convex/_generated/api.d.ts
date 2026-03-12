@@ -9,12 +9,18 @@
  */
 
 import type * as contentstack from "../contentstack.js";
+import type * as fedid from "../fedid.js";
 import type * as import_ from "../import.js";
 import type * as lib_config from "../lib/config.js";
 import type * as lib_contentstack_client from "../lib/contentstack/client.js";
 import type * as lib_contentstack_retrieve from "../lib/contentstack/retrieve.js";
 import type * as lib_contentstack_types from "../lib/contentstack/types.js";
 import type * as lib_contentstack_update from "../lib/contentstack/update.js";
+import type * as lib_fedid_client from "../lib/fedid/client.js";
+import type * as lib_fedid_mapping from "../lib/fedid/mapping.js";
+import type * as lib_fedid_retrieve from "../lib/fedid/retrieve.js";
+import type * as lib_fedid_sportGroupLookup from "../lib/fedid/sportGroupLookup.js";
+import type * as lib_fedid_types from "../lib/fedid/types.js";
 import type * as lib_locales from "../lib/locales.js";
 import type * as lib_sphere_client from "../lib/sphere/client.js";
 import type * as lib_sphere_retrieve from "../lib/sphere/retrieve.js";
@@ -31,12 +37,18 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   contentstack: typeof contentstack;
+  fedid: typeof fedid;
   import: typeof import_;
   "lib/config": typeof lib_config;
   "lib/contentstack/client": typeof lib_contentstack_client;
   "lib/contentstack/retrieve": typeof lib_contentstack_retrieve;
   "lib/contentstack/types": typeof lib_contentstack_types;
   "lib/contentstack/update": typeof lib_contentstack_update;
+  "lib/fedid/client": typeof lib_fedid_client;
+  "lib/fedid/mapping": typeof lib_fedid_mapping;
+  "lib/fedid/retrieve": typeof lib_fedid_retrieve;
+  "lib/fedid/sportGroupLookup": typeof lib_fedid_sportGroupLookup;
+  "lib/fedid/types": typeof lib_fedid_types;
   "lib/locales": typeof lib_locales;
   "lib/sphere/client": typeof lib_sphere_client;
   "lib/sphere/retrieve": typeof lib_sphere_retrieve;

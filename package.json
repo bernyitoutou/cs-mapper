@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "env:staging": "node scripts/set-convex-env.mjs staging",
-    "env:production": "node scripts/set-convex-env.mjs production"
+    "env:production": "node scripts/set-convex-env.mjs production",
+    "generate:sport-mapping": "tsx scripts/generateSportGroupMapping.ts --env .env.staging",
+    "generate:sport-mapping:prod": "tsx scripts/generateSportGroupMapping.ts --env .env.production"
   },
   "keywords": [],
   "author": "",
