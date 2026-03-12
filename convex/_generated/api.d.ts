@@ -17,7 +17,9 @@ import type * as lib_contentstack_update from "../lib/contentstack/update.js";
 import type * as lib_sphere_client from "../lib/sphere/client.js";
 import type * as lib_sphere_retrieve from "../lib/sphere/retrieve.js";
 import type * as lib_sphere_types from "../lib/sphere/types.js";
+import type * as lib_utils from "../lib/utils.js";
 import type * as sphere from "../sphere.js";
+import type * as sync from "../sync.js";
 
 import type {
   ApiFromModules,
@@ -35,7 +37,9 @@ declare const fullApi: ApiFromModules<{
   "lib/sphere/client": typeof lib_sphere_client;
   "lib/sphere/retrieve": typeof lib_sphere_retrieve;
   "lib/sphere/types": typeof lib_sphere_types;
+  "lib/utils": typeof lib_utils;
   sphere: typeof sphere;
+  sync: typeof sync;
 }>;
 
 /**

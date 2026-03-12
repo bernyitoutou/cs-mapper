@@ -10,8 +10,10 @@ Mass-action tooling for ContentStack and Sphere, built on [Convex actions](https
 convex/
   contentstack.ts        → Exposed Convex actions (ContentStack)
   sphere.ts              → Exposed Convex actions (Sphere)
+  sync.ts                → Cross-source sync check actions
   lib/
     config.ts            → Environment variable loader
+    utils.ts             → Shared helpers (getNestedValue…)
     contentstack/
       types.ts           → TypeScript types (Entry, Pagination, params…)
       client.ts          → Low-level fetch helpers (Delivery API + Management API)
@@ -239,6 +241,55 @@ await api.sphere.sphereGetByModelCodes({
 // List available content type definitions
 await api.sphere.sphereGetContentTypes()
 ```
+
+---
+
+## Sync actions
+
+All actions live in `convex/sync.ts`.
+
+### `checkSyncStatus` — Sphere ↔ ContentStack
+
+Compares all **published** items from a Sphere content type against all **published** entries from a ContentStack content type, matching on configurable dot-notation field paths.
+
+```ts
+const report = await api.sync.checkSyncStatus({
+  // Sphere
+  sphereContentTypeId: "875ef604-5ca2-4ed9-96b7-15e6c6e0fd0d",
+  sphereMatchField: "id",            // dot-notation path on Sphere item
+
+  // ContentStack
+  csContentTypeUid: "product_page",
+  csMatchField: "sphere_id",         // dot-notation path on CS entry
+
+  // Optional filters
+  locale: "fr-FR",
+  sphereStatus: 1,                   // 1 = published (default), 0 = draft
+})
+```
+
+**Report shape:**
+```ts
+{
+  params: { ... },          // echo of input args
+  summary: {
+    sphere:       { total, withMatchField, missingMatchField },
+    contentstack: { total, withMatchField, missingMatchField },
+    sync: {
+      synced: number,
+      onlyInSphere: number,
+      onlyInContentStack: number,
+      syncRate: string,     // e.g. "94.3%"
+    },
+  },
+  details: {
+    onlyInSphere: string[],        // Sphere values not found in CS
+    onlyInContentStack: string[],  // CS values not found in Sphere
+  },
+}
+```
+
+The summary is also printed to the Convex dashboard logs.
 
 ---
 
