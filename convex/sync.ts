@@ -13,6 +13,7 @@ import { getNestedValue, setNestedValue } from "./lib/utils.js";
 import { localeValidator } from "./lib/locales";
 import allSportIdsData from "./lib/fedid/all_sport_ids.json" with { type: "json" };
 import ukSportsCategoriesData from "./lib/sphere/uk-sports-categories.json" with { type: "json" };
+import { contentTypeValidator, Taxonomy } from "./lib/contentstack/types";
 
 /**
  * Check the sync state between a Sphere content type and a ContentStack content type.
@@ -36,7 +37,7 @@ export const checkSyncStatus = action({
     /** Dot-notation path to extract the match key from a Sphere item. e.g. "id", "body.model_code" */
     sphereMatchField: v.string(),
     /** ContentStack content type UID. e.g. "product_page" */
-    csContentTypeUid: v.string(),
+    csContentTypeUid: contentTypeValidator,
     /** Dot-notation path to extract the match key from a CS entry. e.g. "sphere_id", "uid" */
     csMatchField: v.string(),
     /** Locale filter applied to both sides. e.g. "fr-FR" */
@@ -167,7 +168,7 @@ export const sphereImport = action({
     /** Sphere content type UUID */
     sphereContentTypeId: v.string(),
     /** ContentStack content type UID */
-    csContentTypeUid: v.string(),
+    csContentTypeUid: contentTypeValidator,
     /** When true, fetch and map entries but skip all CS writes */
     dryRun: v.optional(v.boolean()),
   },
@@ -315,7 +316,7 @@ export const sphereImport = action({
  */
 export const deleteEntries = action({
   args: {
-    csContentTypeUid: v.string(),
+    csContentTypeUid: contentTypeValidator,
     locale: localeValidator,
   },
 
@@ -374,7 +375,7 @@ export const deleteEntries = action({
  */
 export const massFieldUpdate = action({
   args: {
-    csContentTypeUid: v.string(),
+    csContentTypeUid: contentTypeValidator,
     locale: localeValidator,
     /** Dot-notation field path to update, e.g. "is_active" or "metadata.robot_no_follow" */
     field: v.string(),
@@ -430,7 +431,7 @@ type UKSportsCategory = {
   name: string;
   url: string;
   sphereId: string;
-  taxonomy: string;
+  taxonomy: Taxonomy;
   articleIds?: string[];
 };
 

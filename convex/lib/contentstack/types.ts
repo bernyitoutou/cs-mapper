@@ -1,4 +1,75 @@
-export type Locale = string; // e.g. "en-GB", "fr-FR"
+import { v } from "convex/values";
+
+// ---------------------------------------------------------------------------
+// Enums — Content Types, Taxonomy, Environment, Branch
+// ---------------------------------------------------------------------------
+
+export enum ContentType {
+  BlogPost = "blog_post",
+  BlogSportCategory = "blog_sport_category",
+  BlogContentCategory = "blog_content_category",
+}
+
+export const contentTypeValidator = v.union(
+  v.literal(ContentType.BlogPost),
+  v.literal(ContentType.BlogSportCategory),
+  v.literal(ContentType.BlogContentCategory)
+);
+
+export enum Taxonomy {
+  SportCategory = "sport_category",
+  ContentCategory = "content_category",
+}
+
+export const taxonomyValidator = v.union(
+  v.literal(Taxonomy.SportCategory),
+  v.literal(Taxonomy.ContentCategory)
+);
+
+export enum Environment {
+  Production = "production",
+  Staging = "staging",
+}
+
+export const environmentValidator = v.union(
+  v.literal(Environment.Production),
+  v.literal(Environment.Staging)
+);
+
+export enum Branch {
+  Main = "main",
+  Dev = "dev",
+}
+
+export const branchValidator = v.union(
+  v.literal(Branch.Main),
+  v.literal(Branch.Dev)
+);
+
+// ---------------------------------------------------------------------------
+
+
+export enum Locale {
+  EnGb = "en-GB",
+  EnUs = "en-US",
+  FrFr = "fr-FR",
+  DeDe = "de-DE",
+  EsEs = "es-ES",
+  ItIt = "it-IT",
+  JaJp = "ja-JP",
+  ZhCn = "zh-CN",
+}
+
+export const localeValidator = v.union(
+  v.literal(Locale.EnGb),
+  v.literal(Locale.EnUs),
+  v.literal(Locale.FrFr),
+  v.literal(Locale.DeDe),
+  v.literal(Locale.EsEs),
+  v.literal(Locale.ItIt),
+  v.literal(Locale.JaJp),
+  v.literal(Locale.ZhCn)
+);
 
 export type Pagination = {
   /** Max entries per page (CS max is 250) */

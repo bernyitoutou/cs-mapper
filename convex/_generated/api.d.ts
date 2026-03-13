@@ -27,6 +27,10 @@ import type * as lib_sphere_client from "../lib/sphere/client.js";
 import type * as lib_sphere_retrieve from "../lib/sphere/retrieve.js";
 import type * as lib_sphere_types from "../lib/sphere/types.js";
 import type * as lib_utils from "../lib/utils.js";
+import type * as logs from "../logs.js";
+import type * as reportActions from "../reportActions.js";
+import type * as reports from "../reports.js";
+import type * as settings from "../settings.js";
 import type * as sphere from "../sphere.js";
 import type * as sync from "../sync.js";
 
@@ -56,6 +60,10 @@ declare const fullApi: ApiFromModules<{
   "lib/sphere/retrieve": typeof lib_sphere_retrieve;
   "lib/sphere/types": typeof lib_sphere_types;
   "lib/utils": typeof lib_utils;
+  logs: typeof logs;
+  reportActions: typeof reportActions;
+  reports: typeof reports;
+  settings: typeof settings;
   sphere: typeof sphere;
   sync: typeof sync;
 }>;

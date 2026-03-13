@@ -7,6 +7,8 @@ import { config } from "./lib/config.js";
 import { ContentstackError } from "./lib/contentstack/client.js";
 import { createEntry, deleteEntry, publishEntry, updateEntry } from "./lib/contentstack/update.js";
 import { localeValidator } from "./lib/locales.js";
+import { Locale } from "./lib/contentstack/types";
+import { ContentType, contentTypeValidator } from "./lib/contentstack/types";
 
 /**
  * Fields managed by ContentStack that must not be sent in a creation payload.
@@ -36,9 +38,9 @@ function serializeError(err: unknown): string {
  * When createMasterFirst=true, deletes the localized variant first, then the master.
  */
 async function rollback(
-  contentTypeUid: string,
+  contentTypeUid: ContentType,
   uid: string,
-  locale?: string
+  locale?: Locale
 ): Promise<void> {
   try {
     if (locale) {
@@ -88,7 +90,7 @@ type FailedItem = {
 export const massImport = action({
   args: {
     /** ContentStack content type UID. e.g. "blog_post" */
-    contentTypeUid: v.string(),
+    contentTypeUid: contentTypeValidator,
     /** Target locale for all entries. e.g. "fr-FR" */
     locale: localeValidator,
     /** Array of entry field payloads (content type schema fields). */

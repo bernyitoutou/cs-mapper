@@ -1,6 +1,7 @@
 import { getAllSportGroups } from "./retrieve.js";
 import { getAllEntries } from "../contentstack/retrieve.js";
 import type { BlogSportsEntry, SportGroupMappingEntry } from "./types.js";
+import type { Locale } from "../contentstack/types.js";
 
 export interface SportGroupMappingResult {
   mapping: Record<string, SportGroupMappingEntry>;
@@ -15,7 +16,7 @@ const BLOG_SPORT_CATEGORY_UID = "blog_sport_category";
  * Returns only the fields required to build the sport group mapping.
  */
 export async function fetchBlogSportCategoryEntries(locale: string): Promise<BlogSportsEntry[]> {
-  const entries = await getAllEntries<BlogSportsEntry>(BLOG_SPORT_CATEGORY_UID, { locale });
+  const entries = await getAllEntries<BlogSportsEntry>(BLOG_SPORT_CATEGORY_UID, { locale: locale as Locale });
   return entries;
 }
 

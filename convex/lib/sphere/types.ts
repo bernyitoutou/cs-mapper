@@ -54,3 +54,15 @@ export type SphereApiError = {
   message: string;
   code?: string | number;
 };
+
+// ---------------------------------------------------------------------------
+// Sphere content type UUIDs
+// ---------------------------------------------------------------------------
+
+export const SphereContentTypes = {
+  Highlight: "910db489-2c1f-42ad-bc8f-95bc02e16d45",
+  Testing: "2bad7d01-a3d2-4d20-a00f-ad677184b69e",
+  HowToUse: "b0881271-586f-4fb6-88cb-1d6f0d4a584b",
+  HowToRepair: "9d25f7b8-de5c-4c56-9be0-8ce43196ab6f",
+  Storybook: "e8e57267-1b91-48df-8140-7cfc0cc88e4c",
+} as const;

@@ -26,6 +26,8 @@ import {
   unpublishEntry,
   updateEntry,
 } from "./lib/contentstack/update.js";
+import { localeValidator } from "./lib/locales";
+import { contentTypeValidator } from "./lib/contentstack/types";
 
 // ---------------------------------------------------------------------------
 // Shared arg shapes (reused across actions)
@@ -37,7 +39,7 @@ const paginationArgs = {
 };
 
 const retrieveArgs = {
-  locale: v.optional(v.string()),
+  locale: v.optional(localeValidator),
   query: v.optional(v.string()),
   includeDepth: v.optional(v.number()),
   only: v.optional(v.array(v.string())),
@@ -71,7 +73,7 @@ export const csGetEntry = action({
   args: {
     contentTypeUid: v.string(),
     entryUid: v.string(),
-    locale: v.optional(v.string()),
+    locale: v.optional(localeValidator),
     includeDepth: v.optional(v.number()),
   },
   handler: async (_ctx, { contentTypeUid, entryUid, locale, includeDepth }) =>
@@ -95,7 +97,7 @@ export const csGetEntries = action({
 export const csGetAllEntries = action({
   args: {
     contentTypeUid: v.string(),
-    locale: v.optional(v.string()),
+    locale: v.optional(localeValidator),
     query: v.optional(v.string()),
     includeDepth: v.optional(v.number()),
     only: v.optional(v.array(v.string())),
@@ -110,7 +112,7 @@ export const csGetAllEntries = action({
 export const csCountEntries = action({
   args: {
     contentTypeUid: v.string(),
-    locale: v.optional(v.string()),
+    locale: v.optional(localeValidator),
     query: v.optional(v.string()),
   },
   handler: async (_ctx, { contentTypeUid, ...params }) =>
@@ -126,7 +128,7 @@ export const csGetManagedEntry = action({
   args: {
     contentTypeUid: v.string(),
     entryUid: v.string(),
-    locale: v.optional(v.string()),
+    locale: v.optional(localeValidator),
   },
   handler: async (_ctx, { contentTypeUid, entryUid, locale }) =>
     getManagedEntry(contentTypeUid, entryUid, { locale }),
@@ -145,8 +147,8 @@ export const csGetManagedEntries = action({
 /** Fetch ALL entries including drafts, auto-paginating. */
 export const csGetAllManagedEntries = action({
   args: {
-    contentTypeUid: v.string(),
-    locale: v.optional(v.string()),
+    contentTypeUid: contentTypeValidator,
+    locale: v.optional(localeValidator),
     query: v.optional(v.string()),
     includeDepth: v.optional(v.number()),
     only: v.optional(v.array(v.string())),
@@ -194,11 +196,11 @@ export const csGetAllAssets = action({
  */
 export const csUpdateEntry = action({
   args: {
-    contentTypeUid: v.string(),
+    contentTypeUid: contentTypeValidator,
     entryUid: v.string(),
     /** Full entry payload, e.g. the result of csGetManagedEntry merged with your changes */
     entry: v.any(),
-    locale: v.optional(v.string()),
+    locale: v.optional(localeValidator),
   },
   handler: async (_ctx, { contentTypeUid, entryUid, entry, locale }) =>
     updateEntry(
@@ -212,7 +214,7 @@ export const csUpdateEntry = action({
 /** Publish an entry to one or more environments / locales. */
 export const csPublishEntry = action({
   args: {
-    contentTypeUid: v.string(),
+    contentTypeUid: contentTypeValidator,
     entryUid: v.string(),
     environments: v.array(v.string()),
     locales: v.array(v.string()),
@@ -225,7 +227,7 @@ export const csPublishEntry = action({
 /** Unpublish an entry from one or more environments / locales. */
 export const csUnpublishEntry = action({
   args: {
-    contentTypeUid: v.string(),
+    contentTypeUid: contentTypeValidator,
     entryUid: v.string(),
     environments: v.array(v.string()),
     locales: v.array(v.string()),
@@ -239,7 +241,7 @@ export const csUnpublishEntry = action({
 export const csBulkPublish = action({
   args: {
     entries: v.array(
-      v.object({ content_type: v.string(), uid: v.string(), locale: v.string() })
+      v.object({ content_type: contentTypeValidator, uid: v.string(), locale: localeValidator })
     ),
     environments: v.array(v.string()),
     locales: v.array(v.string()),
@@ -251,8 +253,8 @@ export const csBulkPublish = action({
 /** Bulk update a field across many entries of the same content type (async, returns a job ID). */
 export const csBulkUpdate = action({
   args: {
-    content_type: v.string(),
-    entries: v.array(v.object({ uid: v.string(), locale: v.string() })),
+    content_type: contentTypeValidator,
+    entries: v.array(v.object({ uid: v.string(), locale: localeValidator })),
     update: v.any(),
   },
   handler: async (_ctx, { content_type, entries, update }) =>
@@ -275,10 +277,10 @@ export const csGetBulkJobStatus = action({
  */
 export const csPatchEntries = action({
   args: {
-    contentTypeUid: v.string(),
+    contentTypeUid: contentTypeValidator,
     entries: v.array(v.any()),
     patch: v.any(),
-    locale: v.optional(v.string()),
+    locale: v.optional(localeValidator),
   },
   handler: async (_ctx, { contentTypeUid, entries, patch, locale }) =>
     patchEntries(

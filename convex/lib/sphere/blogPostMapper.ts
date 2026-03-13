@@ -58,7 +58,7 @@ export function mapSphereToBlogPost(
       description: entry.meta_description ?? "",
       robot_no_follow: false,
     },
-    tags: ["content_mapper", "cs_mapper"],
+    tags: ["cs_mapper"],
     taxonomies,
   };
 

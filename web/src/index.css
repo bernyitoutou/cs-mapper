@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dec-blue: #0082c3;
+  --color-dec-blue-dark: #005f8e;
+  --color-dec-blue-light: #e6f4fb;
+  --color-surface: #f5f5f5;
+  --color-border: #e0e0e0;
+}
+
+/* Base resets */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--color-surface);
+  color: #1a1a1a;
+}
+
+/* Markdown report rendering */
+.report-content {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #1a1a1a;
+}
+.report-content h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 0.75rem; }
+.report-content h2 { font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 0.5rem; color: #0082c3; }
+.report-content h3 { font-size: 1rem; font-weight: 600; margin: 1rem 0 0.4rem; }
+.report-content table { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
+.report-content th { background: #f0f0f0; padding: 6px 10px; text-align: left; border: 1px solid #ddd; font-weight: 600; }
+.report-content td { padding: 5px 10px; border: 1px solid #ddd; }
+.report-content tr:nth-child(even) td { background: #fafafa; }
+.report-content code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
+.report-content pre { background: #f0f0f0; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 0.82rem; }
+.report-content blockquote { border-left: 3px solid #0082c3; padding-left: 12px; color: #555; margin: 0.5rem 0; }
+.report-content hr { border: none; border-top: 1px solid #e0e0e0; margin: 1rem 0; }
+.report-content details summary { cursor: pointer; font-weight: 600; color: #666; }
