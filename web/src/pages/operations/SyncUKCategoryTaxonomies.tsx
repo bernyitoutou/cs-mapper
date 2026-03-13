@@ -7,6 +7,8 @@ import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
 import { Locale } from "@convex/lib/locales";
+import { ParamGuide } from "../../components/ParamGuide";
+import { operations } from "../../lib/operations";
 
 export default function SyncUKCategoryTaxonomies() {
   const navigate = useNavigate();
@@ -50,10 +52,12 @@ export default function SyncUKCategoryTaxonomies() {
         </div>
       </div>
 
+      <ParamGuide params={operations.find((o) => o.id === "sync-uk-category-taxonomies")!.paramsMeta} />
+
       <Card>
         <div className="grid grid-cols-2 gap-3">
           <Select
-            label="Locale"
+            label="locale"
             value={form.locale}
             onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
           >

@@ -8,6 +8,10 @@ import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
 import { ContentType } from "@convex/lib/contentstack/types";
 import { Locale } from "@convex/lib/locales";
+import { ParamGuide } from "../../components/ParamGuide";
+import { operations } from "../../lib/operations";
+import { ParamGuide } from "../../components/ParamGuide";
+import { operations } from "../../lib/operations";
 
 type ImportResult = {
   created: number;
@@ -109,6 +113,8 @@ export default function MassImport() {
           <h1 className="text-xl font-bold text-gray-800">Mass Import</h1>
           <p className="text-sm text-gray-500">Bulk-create entries from a JSON file upload.</p>
         </div>
+      <ParamGuide params={operations.find((o) => o.id === "mass-import")!.paramsMeta} />
+
       </div>
 
       {/* Upload */}
@@ -158,7 +164,7 @@ export default function MassImport() {
         <h2 className="text-sm font-semibold text-gray-700 mb-3">2. Import options</h2>
         <div className="grid grid-cols-2 gap-3">
           <Select
-            label="Content Type"
+            label="content type"
             value={options.contentTypeUid}
             onChange={(e) => setOptions((o) => ({ ...o, contentTypeUid: e.target.value as ContentType }))}
           >
@@ -167,7 +173,7 @@ export default function MassImport() {
             ))}
           </Select>
           <Select
-            label="Locale"
+            label="locale"
             value={options.locale}
             onChange={(e) => setOptions((o) => ({ ...o, locale: e.target.value as Locale }))}
           >

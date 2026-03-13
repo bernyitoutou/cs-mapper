@@ -7,6 +7,8 @@ import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
 import { Locale } from "@convex/lib/locales";
+import { ParamGuide } from "../../components/ParamGuide";
+import { operations } from "../../lib/operations";
 
 export default function GenerateMigrationReport() {
   const navigate = useNavigate();
@@ -54,10 +56,12 @@ export default function GenerateMigrationReport() {
         </div>
       </div>
 
+      <ParamGuide params={operations.find((o) => o.id === "generate-migration-report")!.paramsMeta} />
+
       <Card>
         <div className="grid grid-cols-2 gap-3">
           <Select
-            label="Locale"
+            label="locale"
             value={locale}
             onChange={(e) => setLocale(e.target.value as Locale)}
           >

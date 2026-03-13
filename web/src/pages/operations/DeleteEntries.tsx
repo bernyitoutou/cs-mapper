@@ -8,6 +8,8 @@ import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
 import { ContentType } from "@convex/lib/contentstack/types";
 import { Locale } from "@convex/lib/locales";
+import { ParamGuide } from "../../components/ParamGuide";
+import { operations } from "../../lib/operations";
 
 export default function DeleteEntries() {
   const navigate = useNavigate();
@@ -59,10 +61,12 @@ export default function DeleteEntries() {
         ⚠️ <strong>Destructive operation.</strong> All entries of the selected content type for the given locale will be unpublished and permanently deleted.
       </div>
 
+      <ParamGuide params={operations.find((o) => o.id === "delete-entries")!.paramsMeta} danger />
+
       <Card>
         <div className="grid grid-cols-2 gap-3">
           <Select
-            label="Content Type"
+            label="content type"
             value={form.csContentTypeUid}
             onChange={(e) => setForm((f) => ({ ...f, csContentTypeUid: e.target.value as ContentType }))}
           >
@@ -71,7 +75,7 @@ export default function DeleteEntries() {
             ))}
           </Select>
           <Select
-            label="Locale"
+            label="locale"
             value={form.locale}
             onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
           >

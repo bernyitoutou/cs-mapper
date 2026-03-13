@@ -9,6 +9,8 @@ import { Select } from "../../components/ui/Select";
 import { ContentType } from "@convex/lib/contentstack/types";
 import { Locale } from "@convex/lib/locales";
 import { SphereContentTypes } from "@convex/lib/sphere/types";
+import { ParamGuide } from "../../components/ParamGuide";
+import { operations } from "../../lib/operations";
 
 export default function SphereImport() {
   const navigate = useNavigate();
@@ -59,11 +61,13 @@ export default function SphereImport() {
         </div>
       </div>
 
+      <ParamGuide params={operations.find((o) => o.id === "sphere-import")!.paramsMeta} />
+
       {/* Form */}
       <Card>
         <div className="grid grid-cols-2 gap-3">
           <Select
-            label="Sphere Content Type"
+            label="Sphere type"
             value={form.sphereContentTypeId}
             onChange={(e) => setForm((f) => ({ ...f, sphereContentTypeId: e.target.value }))}
           >
@@ -72,7 +76,7 @@ export default function SphereImport() {
             ))}
           </Select>
           <Select
-            label="CS Content Type"
+            label="CS type"
             value={form.csContentTypeUid}
             onChange={(e) => setForm((f) => ({ ...f, csContentTypeUid: e.target.value as ContentType }))}
           >
@@ -81,7 +85,7 @@ export default function SphereImport() {
             ))}
           </Select>
           <Select
-            label="Locale"
+            label="locale"
             value={form.locale}
             onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
           >

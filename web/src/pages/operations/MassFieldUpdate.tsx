@@ -9,6 +9,8 @@ import { Select } from "../../components/ui/Select";
 import { Input } from "../../components/ui/Input";
 import { ContentType } from "@convex/lib/contentstack/types";
 import { Locale } from "@convex/lib/locales";
+import { ParamGuide } from "../../components/ParamGuide";
+import { operations } from "../../lib/operations";
 
 export default function MassFieldUpdate() {
   const navigate = useNavigate();
@@ -74,10 +76,12 @@ export default function MassFieldUpdate() {
         </div>
       </div>
 
+      <ParamGuide params={operations.find((o) => o.id === "mass-field-update")!.paramsMeta} />
+
       <Card>
         <div className="grid grid-cols-2 gap-3">
           <Select
-            label="Content Type"
+            label="content type"
             value={form.csContentTypeUid}
             onChange={(e) => setForm((f) => ({ ...f, csContentTypeUid: e.target.value as ContentType }))}
           >
@@ -86,7 +90,7 @@ export default function MassFieldUpdate() {
             ))}
           </Select>
           <Select
-            label="Locale"
+            label="locale"
             value={form.locale}
             onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
           >
@@ -95,14 +99,14 @@ export default function MassFieldUpdate() {
             ))}
           </Select>
           <Input
-            label="Field path"
+            label="field path"
             placeholder="e.g. is_active or metadata.robot_no_follow"
             value={form.field}
             onChange={(e) => setForm((f) => ({ ...f, field: e.target.value }))}
             hint="Supports dot notation for nested fields"
           />
           <Input
-            label="Value (JSON)"
+            label="value"
             placeholder='e.g. false, "hello", 42'
             value={form.valueRaw}
             onChange={(e) => {

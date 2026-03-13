@@ -10,6 +10,8 @@ import { Input } from "../../components/ui/Input";
 import { ContentType } from "@convex/lib/contentstack/types";
 import { Locale } from "@convex/lib/locales";
 import { SphereContentTypes } from "@convex/lib/sphere/types";
+import { ParamGuide } from "../../components/ParamGuide";
+import { operations } from "../../lib/operations";
 
 type SyncSummary = {
   sphere?: { total: number; withMatchField: number };
@@ -65,11 +67,13 @@ export default function CheckSyncStatus() {
         </div>
       </div>
 
+      <ParamGuide params={operations.find((o) => o.id === "check-sync-status")!.paramsMeta} />
+
       {/* Form */}
       <Card>
         <div className="grid grid-cols-2 gap-3">
           <Select
-            label="Sphere Content Type"
+            label="Sphere type"
             value={form.sphereContentTypeId}
             onChange={(e) => setForm((f) => ({ ...f, sphereContentTypeId: e.target.value }))}
           >
@@ -78,7 +82,7 @@ export default function CheckSyncStatus() {
             ))}
           </Select>
           <Select
-            label="CS Content Type"
+            label="CS type"
             value={form.csContentTypeUid}
             onChange={(e) => setForm((f) => ({ ...f, csContentTypeUid: e.target.value as ContentType }))}
           >
@@ -87,17 +91,17 @@ export default function CheckSyncStatus() {
             ))}
           </Select>
           <Input
-            label="Sphere Match Field"
+            label="Sphere match field"
             value={form.sphereMatchField}
             onChange={(e) => setForm((f) => ({ ...f, sphereMatchField: e.target.value }))}
           />
           <Input
-            label="CS Match Field"
+            label="CS match field"
             value={form.csMatchField}
             onChange={(e) => setForm((f) => ({ ...f, csMatchField: e.target.value }))}
           />
           <Select
-            label="Locale"
+            label="locale"
             value={form.locale}
             onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
           >
