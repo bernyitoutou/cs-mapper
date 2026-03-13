@@ -8,9 +8,6 @@
  * @module
  */
 
-import type * as contentstack from "../contentstack.js";
-import type * as fedid from "../fedid.js";
-import type * as import_ from "../import.js";
 import type * as lib_config from "../lib/config.js";
 import type * as lib_contentstack_client from "../lib/contentstack/client.js";
 import type * as lib_contentstack_retrieve from "../lib/contentstack/retrieve.js";
@@ -27,12 +24,19 @@ import type * as lib_sphere_client from "../lib/sphere/client.js";
 import type * as lib_sphere_retrieve from "../lib/sphere/retrieve.js";
 import type * as lib_sphere_types from "../lib/sphere/types.js";
 import type * as lib_utils from "../lib/utils.js";
-import type * as logs from "../logs.js";
-import type * as reportActions from "../reportActions.js";
-import type * as reports from "../reports.js";
-import type * as settings from "../settings.js";
-import type * as sphere from "../sphere.js";
-import type * as sync from "../sync.js";
+import type * as operations_checkSyncStatus from "../operations/checkSyncStatus.js";
+import type * as operations_deleteEntries from "../operations/deleteEntries.js";
+import type * as operations_generateMigrationReport from "../operations/generateMigrationReport.js";
+import type * as operations_massFieldUpdate from "../operations/massFieldUpdate.js";
+import type * as operations_massImport from "../operations/massImport.js";
+import type * as operations_sphereImport from "../operations/sphereImport.js";
+import type * as operations_syncUKCategoryTaxonomies from "../operations/syncUKCategoryTaxonomies.js";
+import type * as services_contentstack from "../services/contentstack.js";
+import type * as services_fedid from "../services/fedid.js";
+import type * as services_logs from "../services/logs.js";
+import type * as services_reports from "../services/reports.js";
+import type * as services_settings from "../services/settings.js";
+import type * as services_sphere from "../services/sphere.js";
 
 import type {
   ApiFromModules,
@@ -41,9 +45,6 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  contentstack: typeof contentstack;
-  fedid: typeof fedid;
-  import: typeof import_;
   "lib/config": typeof lib_config;
   "lib/contentstack/client": typeof lib_contentstack_client;
   "lib/contentstack/retrieve": typeof lib_contentstack_retrieve;
@@ -60,12 +61,19 @@ declare const fullApi: ApiFromModules<{
   "lib/sphere/retrieve": typeof lib_sphere_retrieve;
   "lib/sphere/types": typeof lib_sphere_types;
   "lib/utils": typeof lib_utils;
-  logs: typeof logs;
-  reportActions: typeof reportActions;
-  reports: typeof reports;
-  settings: typeof settings;
-  sphere: typeof sphere;
-  sync: typeof sync;
+  "operations/checkSyncStatus": typeof operations_checkSyncStatus;
+  "operations/deleteEntries": typeof operations_deleteEntries;
+  "operations/generateMigrationReport": typeof operations_generateMigrationReport;
+  "operations/massFieldUpdate": typeof operations_massFieldUpdate;
+  "operations/massImport": typeof operations_massImport;
+  "operations/sphereImport": typeof operations_sphereImport;
+  "operations/syncUKCategoryTaxonomies": typeof operations_syncUKCategoryTaxonomies;
+  "services/contentstack": typeof services_contentstack;
+  "services/fedid": typeof services_fedid;
+  "services/logs": typeof services_logs;
+  "services/reports": typeof services_reports;
+  "services/settings": typeof services_settings;
+  "services/sphere": typeof services_sphere;
 }>;
 
 /**

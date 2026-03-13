@@ -37,13 +37,13 @@ export default function EntryManager({ settings }: { settings: Settings }) {
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
 
-  const getEntries = useAction(api.contentstack.csGetManagedEntries);
-  const publishEntry = useAction(api.contentstack.csPublishEntry);
-  const unpublishEntry = useAction(api.contentstack.csUnpublishEntry);
-  const updateEntry = useAction(api.contentstack.csUpdateEntry);
-  const bulkPublish = useAction(api.contentstack.csBulkPublish);
-  const getBulkJobStatus = useAction(api.contentstack.csGetBulkJobStatus);
-  const writelog = useMutation(api.logs.writelog);
+  const getEntries = useAction(api.services.contentstack.csGetManagedEntries);
+  const publishEntry = useAction(api.services.contentstack.csPublishEntry);
+  const unpublishEntry = useAction(api.services.contentstack.csUnpublishEntry);
+  const updateEntry = useAction(api.services.contentstack.csUpdateEntry);
+  const bulkPublish = useAction(api.services.contentstack.csBulkPublish);
+  const getBulkJobStatus = useAction(api.services.contentstack.csGetBulkJobStatus);
+  const writelog = useMutation(api.services.logs.writelog);
 
   const bulkAbortRef = useRef(false);
   // Abort any in-flight bulk poll when the component unmounts

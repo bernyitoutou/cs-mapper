@@ -1,6 +1,6 @@
 "use node";
 
-import { action } from "./_generated/server";
+import { action } from "../_generated/server";
 import { v } from "convex/values";
 
 import {
@@ -15,7 +15,7 @@ import {
   getEntry,
   getManagedEntries,
   getManagedEntry,
-} from "./lib/contentstack/retrieve.js";
+} from "../lib/contentstack/retrieve.js";
 
 import {
   bulkPublish,
@@ -25,9 +25,9 @@ import {
   publishEntry,
   unpublishEntry,
   updateEntry,
-} from "./lib/contentstack/update.js";
-import { localeValidator } from "./lib/locales";
-import { contentTypeValidator, environmentValidator } from "./lib/contentstack/types";
+} from "../lib/contentstack/update.js";
+import { localeValidator } from "../lib/locales";
+import { contentTypeValidator, environmentValidator } from "../lib/contentstack/types";
 
 // ---------------------------------------------------------------------------
 // Shared arg shapes (reused across actions)

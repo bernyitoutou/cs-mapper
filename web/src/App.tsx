@@ -18,8 +18,8 @@ const tabs: { id: Tab; label: string }[] = [
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("sync");
-  const settings = useQuery(api.settings.getSettings);
-  const updateSettings = useMutation(api.settings.updateSettings);
+  const settings = useQuery(api.services.settings.getSettings);
+  const updateSettings = useMutation(api.services.settings.updateSettings);
 
   const isProd =
     settings?.csEnvironment === Environment.Production &&

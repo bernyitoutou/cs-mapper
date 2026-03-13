@@ -32,8 +32,8 @@ export default function MassImport({ settings: _settings }: { settings: Settings
   const [loading, setLoading] = useState(false);
   const [expandedFailures, setExpandedFailures] = useState(false);
 
-  const massImport = useAction(api.import.massImport);
-  const writelog = useMutation(api.logs.writelog);
+  const massImport = useAction(api.operations.massImport.massImport);
+  const writelog = useMutation(api.services.logs.writelog);
   const fileRef = useRef<HTMLInputElement>(null);
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {

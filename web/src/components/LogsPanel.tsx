@@ -21,8 +21,8 @@ function timeAgo(ts: number): string {
 }
 
 export default function LogsPanel() {
-  const logs = useQuery(api.logs.getLogs);
-  const clearLogs = useMutation(api.logs.clearLogs);
+  const logs = useQuery(api.services.logs.getLogs);
+  const clearLogs = useMutation(api.services.logs.clearLogs);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   function toggle(id: string) {

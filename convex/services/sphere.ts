@@ -1,6 +1,6 @@
 "use node";
 
-import { action } from "./_generated/server";
+import { action } from "../_generated/server";
 import { v } from "convex/values";
 
 import {
@@ -9,7 +9,7 @@ import {
   getSphereContentsByModelCode,
   getSphereContentTypes,
   searchSphereContents,
-} from "./lib/sphere/retrieve.js";
+} from "../lib/sphere/retrieve.js";
 
 // ---------------------------------------------------------------------------
 // Retrieve
@@ -26,7 +26,7 @@ export const sphereGetByUUID = action({
  *
  * @example
  * // from a Convex client
- * await api.sphere.sphereSearch({ contentTypeId: "875ef604-...", locale: "fr-FR", status: 1 })
+ * await api.services.sphere.sphereSearch({ contentTypeId: "875ef604-...", locale: "fr-FR", status: 1 })
  */
 export const sphereSearch = action({
   args: {
@@ -68,7 +68,7 @@ export const sphereGetAll = action({
  * Get Sphere contents for one or more product model codes.
  *
  * @example
- * await api.sphere.sphereGetByModelCodes({
+ * await api.services.sphere.sphereGetByModelCodes({
  *   modelCodes: ["8581842"],
  *   contentTypeId: "875ef604-5ca2-4ed9-96b7-15e6c6e0fd0d",
  *   locale: "en-GB",

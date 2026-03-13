@@ -1,17 +1,17 @@
 "use node";
 
-import { action } from "./_generated/server";
+import { action } from "../_generated/server";
 import { v } from "convex/values";
 
-import { localeValidator } from "./lib/locales.js";
-import { getSportsForGroup, getSportsForGroups } from "./lib/fedid/retrieve.js";
-import { buildSportGroupMapping } from "./lib/fedid/mapping.js";
+import { localeValidator } from "../lib/locales.js";
+import { getSportsForGroup, getSportsForGroups } from "../lib/fedid/retrieve.js";
+import { buildSportGroupMapping } from "../lib/fedid/mapping.js";
 
 /**
  * Get the sport IDs belonging to a given sport group ID from the Referential API.
  *
  * @example
- * await api.fedid.getSportIdsForGroup({
+ * await api.services.fedid.getSportIdsForGroup({
  *   sportGroupId: "14",
  *   locale: "en-GB",
  * })
@@ -34,7 +34,7 @@ export const getSportIdsForGroup = action({
  * Batch resolve multiple sport group IDs → sport IDs in a single API request.
  *
  * @example
- * await api.fedid.getSportIdsForGroups({
+ * await api.services.fedid.getSportIdsForGroups({
  *   sportGroupIds: ["14", "83", "180"],
  *   locale: "en-GB",
  * })
@@ -71,7 +71,7 @@ const blogSportsEntryValidator = v.object({
  * a deduplicated list of all sport IDs that appear in at least one group.
  *
  * @example
- * await api.fedid.generateSportGroupMapping({
+ * await api.services.fedid.generateSportGroupMapping({
  *   entries: [...],   // blog_sports_entries
  *   locale: "en-GB",
  * })

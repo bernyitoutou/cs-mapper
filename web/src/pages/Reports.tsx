@@ -7,13 +7,13 @@ import DOMPurify from "dompurify";
 import { Locale } from "@convex/lib/locales";
 
 export default function Reports() {
-  const reports = useQuery(api.reports.listReports);
+  const reports = useQuery(api.services.reports.listReports);
   const [selectedId, setSelectedId] = useState<Id<"reports"> | null>(null);
-  const selectedReport = useQuery(api.reports.getReport, selectedId ? { id: selectedId } : "skip");
-  const deleteReport = useMutation(api.reports.deleteReport);
-  const saveReport = useMutation(api.reports.saveReport);
-  const generateReport = useAction(api.reportActions.generateMigrationReport);
-  const writelog = useMutation(api.logs.writelog);
+  const selectedReport = useQuery(api.services.reports.getReport, selectedId ? { id: selectedId } : "skip");
+  const deleteReport = useMutation(api.services.reports.deleteReport);
+  const saveReport = useMutation(api.services.reports.saveReport);
+  const generateReport = useAction(api.operations.generateMigrationReport.generateMigrationReport);
+  const writelog = useMutation(api.services.logs.writelog);
 
   // ── Generate ─────────────────────────────────────────────────────────────
   const [genLocale, setGenLocale] = useState<Locale>(Locale.EnGb);

@@ -1,15 +1,15 @@
 "use node";
 
-import { action } from "./_generated/server";
-import { api } from "./_generated/api";
+import { action } from "../_generated/server";
+import { api } from "../_generated/api";
 import { v } from "convex/values";
 
-import { config } from "./lib/config.js";
-import { ContentstackError } from "./lib/contentstack/client.js";
-import { createEntry, deleteEntry, publishEntry, updateEntry } from "./lib/contentstack/update.js";
-import { getAllManagedEntries } from "./lib/contentstack/retrieve.js";
-import { localeValidator, Locale } from "./lib/locales.js";
-import { ContentType, contentTypeValidator } from "./lib/contentstack/types";
+import { config } from "../lib/config.js";
+import { ContentstackError } from "../lib/contentstack/client.js";
+import { createEntry, deleteEntry, publishEntry, updateEntry } from "../lib/contentstack/update.js";
+import { getAllManagedEntries } from "../lib/contentstack/retrieve.js";
+import { localeValidator, Locale } from "../lib/locales.js";
+import { ContentType, contentTypeValidator } from "../lib/contentstack/types";
 
 /**
  * Fields managed by ContentStack that must not be sent in a creation payload.
@@ -77,7 +77,7 @@ type FailedItem = {
  *   that enforce the master → locale relationship.
  *
  * @example
- * await api.import.massImport({
+ * await api.operations.massImport({
  *   contentTypeUid: "blog_post",
  *   locale: "fr-FR",
  *   items: [
@@ -236,7 +236,7 @@ export const massImport = action({
     }
     console.log("==========================\n");
 
-    await ctx.runMutation(api.logs.writelog, {
+    await ctx.runMutation(api.services.logs.writelog, {
       type: "massImport",
       status: failed.length === 0 ? "success" : "error",
       params: {

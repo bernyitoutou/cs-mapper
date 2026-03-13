@@ -1,11 +1,11 @@
 "use node";
 
-import { action } from "./_generated/server";
-import { api } from "./_generated/api";
-import { managementGet } from "./lib/contentstack/client.js";
-import { getContentHTMLByUUID } from "./lib/sphere/client.js";
-import { localeValidator } from "./lib/locales.js";
-import ukSportsCategoriesData from "./lib/sphere/uk-sports-categories.json" with { type: "json" };
+import { action } from "../_generated/server";
+import { api } from "../_generated/api";
+import { managementGet } from "../lib/contentstack/client.js";
+import { getContentHTMLByUUID } from "../lib/sphere/client.js";
+import { localeValidator } from "../lib/locales.js";
+import ukSportsCategoriesData from "../lib/sphere/uk-sports-categories.json" with { type: "json" };
 
 // ---------------------------------------------------------------------------
 // Types
@@ -313,13 +313,13 @@ export const generateMigrationReport = action({
     const quickReport = buildQuickReport(categoryReports, locale, agg);
     const detailedReport = buildDetailedReport(categoryReports, locale, agg);
 
-    await ctx.runMutation(api.reports.saveReport, {
+    await ctx.runMutation(api.services.reports.saveReport, {
       name: `migration-${dateStr}`,
       content: quickReport,
       locale,
       generatedAt: now,
     });
-    await ctx.runMutation(api.reports.saveReport, {
+    await ctx.runMutation(api.services.reports.saveReport, {
       name: `migration-${dateStr}-detailed`,
       content: detailedReport,
       locale,

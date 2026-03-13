@@ -25,8 +25,8 @@ export default function SyncDashboard({ settings }: { settings: Settings }) {
   });
   const [syncResult, setSyncResult] = useState<Record<string, unknown> | null>(null);
   const [syncLoading, setSyncLoading] = useState(false);
-  const checkSync = useAction(api.sync.checkSyncStatus);
-  const writelog = useMutation(api.logs.writelog);
+  const checkSync = useAction(api.operations.checkSyncStatus.checkSyncStatus);
+  const writelog = useMutation(api.services.logs.writelog);
 
   async function runCheckSync() {
     setSyncLoading(true);
@@ -56,7 +56,7 @@ export default function SyncDashboard({ settings }: { settings: Settings }) {
   });
   const [importResult, setImportResult] = useState<Record<string, unknown> | null>(null);
   const [importLoading, setImportLoading] = useState(false);
-  const sphereImport = useAction(api.sync.sphereImport);
+  const sphereImport = useAction(api.operations.sphereImport.sphereImport);
 
   async function runSphereImport() {
     if (!importForm.dryRun && !confirm(`Run live Sphere import into ContentStack?\nLocale: ${importForm.locale}\nContent type: ${importForm.csContentTypeUid}\n\nThis will create/update/publish entries. Continue?`)) return;

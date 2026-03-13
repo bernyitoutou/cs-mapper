@@ -1,6 +1,6 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query } from "../_generated/server";
 import { v } from "convex/values";
-import { Branch, Environment } from "./lib/contentstack/types.js";
+import { Branch, Environment } from "../lib/contentstack/types.js";
 
 const DEFAULTS = {
   csEnvironment: Environment.Staging,
