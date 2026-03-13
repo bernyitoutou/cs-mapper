@@ -3,7 +3,7 @@ import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { marked } from "marked";
-import { Locale } from "@convex/lib/contentstack/types";
+import { Locale } from "@convex/lib/locales";
 
 export default function Reports() {
   const reports = useQuery(api.reports.listReports);

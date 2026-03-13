@@ -2,7 +2,8 @@ import { useState, useRef } from "react";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LogsPanel from "../components/LogsPanel";
-import { ContentType, Locale } from "@convex/lib/contentstack/types";
+import { ContentType } from "@convex/lib/contentstack/types";
+import { Locale } from "@convex/lib/locales";
 
 type Settings = { csEnvironment: string; csBranch: string } | undefined;
 
