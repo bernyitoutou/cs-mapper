@@ -11,7 +11,9 @@
     "test:sphere-renderer": "tsx scripts/testSphereRenderer.ts",
     "scrape:uk-articles": "tsx scripts/scrapeUKSportsArticles.ts",
     "generate:sport-article-mapping": "tsx scripts/generateSportArticleMapping.ts",
-    "generate:sport-article-mapping:prod": "tsx scripts/generateSportArticleMapping.ts --env .env.production"
+    "generate:sport-article-mapping:prod": "tsx scripts/generateSportArticleMapping.ts --env .env.production",
+    "report:migration": "tsx scripts/generateMigrationReport.ts",
+    "report:migration:prod": "tsx scripts/generateMigrationReport.ts --env .env.production --locale en-GB"
   },
   "keywords": [],
   "author": "",
