@@ -10,6 +10,10 @@ const TYPE_COLORS: Record<string, string> = {
   unpublish: "bg-yellow-100 text-yellow-700",
   update: "bg-gray-100 text-gray-700",
   bulk_publish: "bg-teal-100 text-teal-700",
+  massFieldUpdate: "bg-teal-100 text-teal-700",
+  syncUKCategoryTaxonomies: "bg-teal-100 text-teal-700",
+  deleteEntries: "bg-red-100 text-red-700",
+  generate_report: "bg-blue-100 text-blue-700",
 };
 
 function timeAgo(ts: number): string {
@@ -20,8 +24,9 @@ function timeAgo(ts: number): string {
   return new Date(ts).toLocaleDateString();
 }
 
-export default function LogsPanel() {
-  const logs = useQuery(api.services.logs.getLogs);
+export default function LogsPanel({ filterType }: { filterType?: string } = {}) {
+  const allLogs = useQuery(api.services.logs.getLogs);
+  const logs = filterType ? allLogs?.filter((l: { type: string }) => l.type === filterType) : allLogs;
   const clearLogs = useMutation(api.services.logs.clearLogs);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
@@ -37,7 +42,7 @@ export default function LogsPanel() {
     <div className="mt-6 bg-white rounded-lg border border-[#e0e0e0] overflow-hidden">
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#e0e0e0] bg-gray-50">
         <span className="text-sm font-semibold text-gray-700">
-          Operation Logs
+          {filterType ? `${filterType} logs` : "Operation Logs"}
           {logs && logs.length > 0 && (
             <span className="ml-2 text-xs font-normal text-gray-400">{logs.length} entries</span>
           )}

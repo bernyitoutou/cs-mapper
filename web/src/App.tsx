@@ -1,23 +1,20 @@
-import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import SyncDashboard from "./pages/SyncDashboard";
-import EntryManager from "./pages/EntryManager";
-import MassImport from "./pages/MassImport";
-import Reports from "./pages/Reports";
+import { Routes, Route, NavLink } from "react-router-dom";
 import { Branch, Environment } from "@convex/lib/contentstack/types";
 
-type Tab = "sync" | "entries" | "import" | "reports";
-
-const tabs: { id: Tab; label: string }[] = [
-  { id: "sync", label: "Sync" },
-  { id: "entries", label: "Entries" },
-  { id: "import", label: "Import" },
-  { id: "reports", label: "Reports" },
-];
+import Home from "./pages/Home";
+import EntryManager from "./pages/EntryManager";
+import Reports from "./pages/Reports";
+import CheckSyncStatus from "./pages/operations/CheckSyncStatus";
+import SphereImport from "./pages/operations/SphereImport";
+import MassImport from "./pages/operations/MassImport";
+import DeleteEntries from "./pages/operations/DeleteEntries";
+import MassFieldUpdate from "./pages/operations/MassFieldUpdate";
+import SyncUKCategoryTaxonomies from "./pages/operations/SyncUKCategoryTaxonomies";
+import GenerateMigrationReport from "./pages/operations/GenerateMigrationReport";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<Tab>("sync");
   const settings = useQuery(api.services.settings.getSettings);
   const updateSettings = useMutation(api.services.settings.updateSettings);
 
@@ -33,12 +30,22 @@ export default function App() {
     }
   }
 
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    [
+      "px-5 py-3 text-sm font-medium border-b-2 transition-colors",
+      isActive
+        ? "border-dec-blue text-dec-blue"
+        : "border-transparent text-gray-500 hover:text-gray-800",
+    ].join(" ");
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header style={{ background: "#0082c3" }} className="text-white px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <span className="font-bold text-lg tracking-tight">cs-mapper</span>
+          <NavLink to="/" className="font-bold text-lg tracking-tight text-white hover:opacity-80">
+            cs-mapper
+          </NavLink>
           <span className="text-blue-200 text-sm">Content Migration Dashboard</span>
         </div>
         <div className="flex items-center gap-3">
@@ -56,30 +63,27 @@ export default function App() {
         </div>
       </header>
 
-      {/* Tab Navigation */}
-      <nav className="bg-white border-b border-[#e0e0e0] px-6 flex gap-0">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setActiveTab(t.id)}
-            className={[
-              "px-5 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer",
-              activeTab === t.id
-                ? "border-[#0082c3] text-[#0082c3]"
-                : "border-transparent text-gray-500 hover:text-gray-800",
-            ].join(" ")}
-          >
-            {t.label}
-          </button>
-        ))}
+      {/* Nav */}
+      <nav className="bg-white border-b border-border px-6 flex gap-0">
+        <NavLink to="/" end className={navLinkClass}>Home</NavLink>
+        <NavLink to="/entries" className={navLinkClass}>Entries</NavLink>
+        <NavLink to="/reports" className={navLinkClass}>Reports</NavLink>
       </nav>
 
-      {/* Page content */}
+      {/* Routes */}
       <main className="flex-1 p-6">
-        {activeTab === "sync" && <SyncDashboard settings={settings} />}
-        {activeTab === "entries" && <EntryManager settings={settings} />}
-        {activeTab === "import" && <MassImport settings={settings} />}
-        {activeTab === "reports" && <Reports />}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/entries" element={<EntryManager settings={settings} />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/operations/check-sync-status" element={<CheckSyncStatus />} />
+          <Route path="/operations/sphere-import" element={<SphereImport />} />
+          <Route path="/operations/mass-import" element={<MassImport />} />
+          <Route path="/operations/delete-entries" element={<DeleteEntries />} />
+          <Route path="/operations/mass-field-update" element={<MassFieldUpdate />} />
+          <Route path="/operations/sync-uk-category-taxonomies" element={<SyncUKCategoryTaxonomies />} />
+          <Route path="/operations/generate-migration-report" element={<GenerateMigrationReport />} />
+        </Routes>
       </main>
     </div>
   );

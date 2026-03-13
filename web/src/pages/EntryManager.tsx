@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LogsPanel from "../components/LogsPanel";
-import { ContentType, Environment } from "@convex/lib/contentstack/types";
+import { Branch, ContentType, Environment } from "@convex/lib/contentstack/types";
 import { Locale } from "@convex/lib/locales";
 
-type Settings = { csEnvironment: string; csBranch: string } | undefined;
+type Settings = { csEnvironment: Environment; csBranch: Branch } | undefined;
 
 type CSEntry = {
   uid: string;
