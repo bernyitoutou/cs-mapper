@@ -10,8 +10,6 @@ import { ContentType } from "@convex/lib/contentstack/types";
 import { Locale } from "@convex/lib/locales";
 import { ParamGuide } from "../../components/ParamGuide";
 import { operations } from "../../lib/operations";
-import { ParamGuide } from "../../components/ParamGuide";
-import { operations } from "../../lib/operations";
 
 type ImportResult = {
   created: number;
@@ -103,7 +101,7 @@ export default function MassImport() {
   const previewItems = items?.slice(0, 5) ?? [];
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="page-limit-1440 space-y-6">
       <button onClick={() => navigate("/")} className="text-sm text-dec-blue hover:underline cursor-pointer">
         ← Back
       </button>
@@ -113,9 +111,9 @@ export default function MassImport() {
           <h1 className="text-xl font-bold text-gray-800">Mass Import</h1>
           <p className="text-sm text-gray-500">Bulk-create entries from a JSON file upload.</p>
         </div>
-      <ParamGuide params={operations.find((o) => o.id === "mass-import")!.paramsMeta} />
-
       </div>
+
+      <ParamGuide params={operations.find((o) => o.id === "mass-import")!.paramsMeta} />
 
       {/* Upload */}
       <Card>

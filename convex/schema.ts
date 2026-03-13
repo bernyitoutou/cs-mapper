@@ -24,4 +24,27 @@ export default defineSchema({
     key: v.string(),
     value: v.string(),
   }).index("by_key", ["key"]),
+
+  sportCategories: defineTable({
+    name: v.string(),
+    url: v.string(),
+    sphereId: v.string(),
+    taxonomy: v.string(),
+    ddSports: v.optional(v.array(v.number())),
+    articleSphereIds: v.optional(v.array(v.string())),
+    articleIds: v.optional(v.array(v.string())),
+    updatedAt: v.number(),
+  })
+    .index("by_sphereId", ["sphereId"])
+    .index("by_taxonomy", ["taxonomy"]),
+
+  sportGroupMappings: defineTable({
+    groupId: v.string(),
+    label: v.string(),
+    url: v.string(),
+    csUid: v.string(),
+    taxonomy: v.optional(v.string()),
+    sportIds: v.array(v.string()),
+    updatedAt: v.number(),
+  }).index("by_groupId", ["groupId"]),
 });

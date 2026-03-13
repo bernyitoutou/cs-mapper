@@ -15,10 +15,10 @@ export function RecentReports() {
           Recent Reports
         </h2>
         <button
-          onClick={() => navigate("/reports")}
+          onClick={() => navigate("/operations/generate-migration-report")}
           className="text-xs text-dec-blue hover:underline cursor-pointer"
         >
-          View all →
+          Open →
         </button>
       </div>
       <div className="space-y-1.5">
@@ -28,7 +28,7 @@ export function RecentReports() {
         {recent.map((r: { _id: string; name: string; generatedAt: number; locale: string }) => (
           <button
             key={r._id}
-            onClick={() => navigate("/reports")}
+            onClick={() => navigate(`/operations/generate-migration-report?reportId=${r._id}`)}
             className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-left hover:bg-surface transition-colors cursor-pointer"
           >
             <span className="text-xs">📄</span>

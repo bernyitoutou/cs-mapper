@@ -1,5 +1,5 @@
 import { config } from "../config.js";
-import { getTaxonomyBySportId } from "../fedid/sportGroupLookup.js";
+import type { SportGroupLookup } from "../fedid/sportGroupLookup.js";
 import type { SphereContent } from "./types.js";
 
 /**
@@ -9,14 +9,15 @@ import type { SphereContent } from "./types.js";
  * - `teaser_image` is converted to a `pixl_url` using SPHERE_PIXL_HOST.
  */
 export function mapSphereToBlogPost(
-  entry: SphereContent
+  entry: SphereContent,
+  lookup: Pick<SportGroupLookup, "getTaxonomyBySportId">
 ): Record<string, unknown> {
   const ddSports = entry.dd_sports ?? [];
 
   // Unique taxonomy terms from sport IDs
   const taxonomySet = new Set<string>();
   for (const sportId of ddSports) {
-    const term = getTaxonomyBySportId(String(sportId));
+    const term = lookup.getTaxonomyBySportId(String(sportId));
     if (term) taxonomySet.add(term);
   }
   const taxonomies = [...taxonomySet].map((term_uid) => ({

@@ -8,10 +8,10 @@ import { getAllManagedEntries } from "../lib/contentstack/retrieve.js";
 import { createEntry, updateEntry, publishEntry, deleteEntry } from "../lib/contentstack/update.js";
 import { ContentstackError } from "../lib/contentstack/client.js";
 import { config } from "../lib/config.js";
+import { createSportGroupLookup } from "../lib/fedid/sportGroupLookup.js";
 import { getSphereContentByUUID, getSphereContentFromHTML } from "../lib/sphere/retrieve.js";
 import { mapSphereToBlogPost } from "../lib/sphere/blogPostMapper.js";
 import { localeValidator } from "../lib/locales";
-import ukSportsCategoriesData from "../lib/sphere/uk-sports-categories.json" with { type: "json" };
 import { Taxonomy } from "../lib/contentstack/types";
 
 type UKSportsCategory = {
@@ -23,7 +23,7 @@ type UKSportsCategory = {
 };
 
 /**
- * For every article sphere ID listed in uk-sports-categories.json, ensure it exists
+ * For every article sphere ID stored in sportCategories, ensure it exists
  * in ContentStack as a blog_post with the correct sport_category taxonomy term.
  *
  * - If the entry **exists**: adds any missing taxonomy terms (merge only, never removes).
@@ -50,7 +50,16 @@ export const syncUKCategoryTaxonomies = action({
     const { environment } = config.contentstack;
     const TAXONOMY_UID = "sport_category";
 
-    const categories = ukSportsCategoriesData as UKSportsCategory[];
+    const [categories, mappings] = await Promise.all([
+      ctx.runQuery(api.services.sportCategories.listSportCategories, {}),
+      ctx.runQuery(api.services.sportGroupMappings.listSportGroupMappings, {}),
+    ]);
+
+    if (categories.length === 0) {
+      throw new Error("No sport categories found. Run seedSportCategories first.");
+    }
+
+    const lookup = createSportGroupLookup(mappings);
 
     // --- Phase 1: build article-id → required taxonomy terms index ---
     // One article can appear in several categories → union of all their taxonomies.
@@ -150,7 +159,7 @@ export const syncUKCategoryTaxonomies = action({
             console.warn(`  ↩ Sphere API failed (${apiErr instanceof Error ? apiErr.message : apiErr}), using HTML renderer for ${sphereArticleId}`);
             sphereContent = await getSphereContentFromHTML(sphereArticleId);
           }
-          const mapped = mapSphereToBlogPost(sphereContent);
+          const mapped = mapSphereToBlogPost(sphereContent, lookup);
 
           // Merge dd_sports-derived taxonomies with UK-category taxonomies
           const ddSportsTaxonomies = (mapped["taxonomies"] ?? []) as Array<{

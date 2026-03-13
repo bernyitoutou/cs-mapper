@@ -5,7 +5,6 @@ import { api } from "../_generated/api";
 import { managementGet } from "../lib/contentstack/client.js";
 import { getContentHTMLByUUID } from "../lib/sphere/client.js";
 import { localeValidator } from "../lib/locales.js";
-import ukSportsCategoriesData from "../lib/sphere/uk-sports-categories.json" with { type: "json" };
 
 // ---------------------------------------------------------------------------
 // Types
@@ -257,7 +256,12 @@ export const generateMigrationReport = action({
     locale: localeValidator,
   },
   handler: async (ctx, { locale }) => {
-    const categories = ukSportsCategoriesData as SportCategory[];
+    const categories = (await ctx.runQuery(api.services.sportCategories.listSportCategories, {})) as SportCategory[];
+
+    if (categories.length === 0) {
+      throw new Error("No sport categories found. Run seedSportCategories first.");
+    }
+
     const categoryReports: CategoryReport[] = [];
 
     console.log(`\n=== Migration Report — ${categories.length} categories | locale: ${locale} ===\n`);

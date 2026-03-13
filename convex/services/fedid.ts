@@ -55,7 +55,7 @@ export const getSportIdsForGroups = action({
 
 const blogSportsEntryValidator = v.object({
   uid: v.string(),
-  locale: v.string(),
+  locale: localeValidator,
   sport_ddfs_id: v.string(),
   sport_label: v.string(),
   title: v.string(),

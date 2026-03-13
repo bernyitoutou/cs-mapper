@@ -20,6 +20,12 @@ body {
   color: #1a1a1a;
 }
 
+.page-limit-1440 {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
 /* Markdown report rendering */
 .report-content {
   font-size: 0.9rem;

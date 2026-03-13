@@ -4,8 +4,6 @@ import { Routes, Route, NavLink } from "react-router-dom";
 import { Branch, Environment } from "@convex/lib/contentstack/types";
 
 import Home from "./pages/Home";
-import EntryManager from "./pages/EntryManager";
-import Reports from "./pages/Reports";
 import CheckSyncStatus from "./pages/operations/CheckSyncStatus";
 import SphereImport from "./pages/operations/SphereImport";
 import MassImport from "./pages/operations/MassImport";
@@ -13,6 +11,10 @@ import DeleteEntries from "./pages/operations/DeleteEntries";
 import MassFieldUpdate from "./pages/operations/MassFieldUpdate";
 import SyncUKCategoryTaxonomies from "./pages/operations/SyncUKCategoryTaxonomies";
 import GenerateMigrationReport from "./pages/operations/GenerateMigrationReport";
+import CleanEntries from "./pages/operations/CleanEntries";
+import EnrichSportCategories from "./pages/operations/EnrichSportCategories";
+import GenerateSportGroupMapping from "./pages/operations/GenerateSportGroupMapping";
+import SeedSportCategories from "./pages/operations/SeedSportCategories";
 
 export default function App() {
   const settings = useQuery(api.services.settings.getSettings);
@@ -29,14 +31,6 @@ export default function App() {
       updateSettings({ csEnvironment: Environment.Production, csBranch: Branch.Main });
     }
   }
-
-  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    [
-      "px-5 py-3 text-sm font-medium border-b-2 transition-colors",
-      isActive
-        ? "border-dec-blue text-dec-blue"
-        : "border-transparent text-gray-500 hover:text-gray-800",
-    ].join(" ");
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -63,19 +57,10 @@ export default function App() {
         </div>
       </header>
 
-      {/* Nav */}
-      <nav className="bg-white border-b border-border px-6 flex gap-0">
-        <NavLink to="/" end className={navLinkClass}>Home</NavLink>
-        <NavLink to="/entries" className={navLinkClass}>Entries</NavLink>
-        <NavLink to="/reports" className={navLinkClass}>Reports</NavLink>
-      </nav>
-
       {/* Routes */}
       <main className="flex-1 p-6">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/entries" element={<EntryManager settings={settings} />} />
-          <Route path="/reports" element={<Reports />} />
           <Route path="/operations/check-sync-status" element={<CheckSyncStatus />} />
           <Route path="/operations/sphere-import" element={<SphereImport />} />
           <Route path="/operations/mass-import" element={<MassImport />} />
@@ -83,6 +68,10 @@ export default function App() {
           <Route path="/operations/mass-field-update" element={<MassFieldUpdate />} />
           <Route path="/operations/sync-uk-category-taxonomies" element={<SyncUKCategoryTaxonomies />} />
           <Route path="/operations/generate-migration-report" element={<GenerateMigrationReport />} />
+          <Route path="/operations/seed-sport-categories" element={<SeedSportCategories />} />
+          <Route path="/operations/generate-sport-group-mapping" element={<GenerateSportGroupMapping />} />
+          <Route path="/operations/enrich-sport-categories" element={<EnrichSportCategories />} />
+          <Route path="/operations/clean-entries" element={<CleanEntries />} />
         </Routes>
       </main>
     </div>

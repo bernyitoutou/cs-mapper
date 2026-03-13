@@ -4,6 +4,8 @@ import { api } from "@convex/_generated/api";
 
 const TYPE_COLORS: Record<string, string> = {
   sync_check: "bg-blue-100 text-blue-700",
+  seed_sport_categories: "bg-lime-100 text-lime-700",
+  generate_sport_group_mapping: "bg-cyan-100 text-cyan-700",
   sphere_import: "bg-purple-100 text-purple-700",
   mass_import: "bg-orange-100 text-orange-700",
   publish: "bg-green-100 text-green-700",
@@ -12,6 +14,8 @@ const TYPE_COLORS: Record<string, string> = {
   bulk_publish: "bg-teal-100 text-teal-700",
   massFieldUpdate: "bg-teal-100 text-teal-700",
   syncUKCategoryTaxonomies: "bg-teal-100 text-teal-700",
+  enrich_sport_categories: "bg-emerald-100 text-emerald-700",
+  clean_entries: "bg-slate-100 text-slate-700",
   deleteEntries: "bg-red-100 text-red-700",
   generate_report: "bg-blue-100 text-blue-700",
 };

@@ -1,7 +1,9 @@
+import { Locale } from "../locales";
+
 export interface SportGroup {
   id: string;
   name: string;
-  locale: string;
+  locale: Locale;
   type: string;
   sports: string[];
   status: string;
@@ -10,7 +12,7 @@ export interface SportGroup {
 
 export interface BlogSportsEntry {
   uid: string;
-  locale: string;
+  locale: Locale;
   sport_ddfs_id: string;
   sport_label: string;
   title: string;

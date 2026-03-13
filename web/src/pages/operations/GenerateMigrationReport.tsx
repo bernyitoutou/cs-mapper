@@ -1,7 +1,10 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAction, useMutation } from "convex/react";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
 import LogsPanel from "../../components/LogsPanel";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
@@ -12,13 +15,28 @@ import { operations } from "../../lib/operations";
 
 export default function GenerateMigrationReport() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const generateReport = useAction(api.operations.generateMigrationReport.generateMigrationReport);
   const writelog = useMutation(api.services.logs.writelog);
+  const reports = useQuery(api.services.reports.listReports);
+  const deleteReport = useMutation(api.services.reports.deleteReport);
+  const saveReport = useMutation(api.services.reports.saveReport);
 
   const [locale, setLocale] = useState<Locale>(Locale.EnGb);
   const [result, setResult] = useState<{ categories: unknown[]; quickReport: string; detailedReport: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("");
+  const [selectedId, setSelectedId] = useState<Id<"reports"> | null>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadLocale, setUploadLocale] = useState<Locale>(Locale.EnGb);
+  const [uploadLoading, setUploadLoading] = useState(false);
+
+  const selectedReport = useQuery(api.services.reports.getReport, selectedId ? { id: selectedId } : "skip");
+
+  useEffect(() => {
+    const reportId = searchParams.get("reportId");
+    setSelectedId(reportId ? (reportId as Id<"reports">) : null);
+  }, [searchParams]);
 
   async function run() {
     setLoading(true);
@@ -43,8 +61,47 @@ export default function GenerateMigrationReport() {
     }
   }
 
+  async function handleUpload() {
+    if (!uploadFile) return;
+    setUploadLoading(true);
+    try {
+      const content = await uploadFile.text();
+      const name = uploadFile.name.replace(/\.md$/, "");
+      await saveReport({ name, content, locale: uploadLocale, generatedAt: Date.now() });
+      setUploadFile(null);
+    } catch (err) {
+      alert(`Upload failed: ${String(err)}`);
+    } finally {
+      setUploadLoading(false);
+    }
+  }
+
+  async function handleDelete(id: Id<"reports">) {
+    if (selectedId === id) {
+      setSelectedId(null);
+      setSearchParams({});
+    }
+    await deleteReport({ id });
+  }
+
+  function openReport(id: Id<"reports">) {
+    setSelectedId(id);
+    setSearchParams({ reportId: id });
+  }
+
+  function formatDate(ts: number) {
+    return new Date(ts).toLocaleString("en-GB", {
+      day: "2-digit", month: "short", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    });
+  }
+
+  const renderedHtml = selectedReport?.content
+    ? DOMPurify.sanitize(marked(selectedReport.content) as string)
+    : null;
+
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="page-limit-1440 space-y-6">
       <button onClick={() => navigate("/")} className="text-sm text-dec-blue hover:underline cursor-pointer">
         ← Back
       </button>
@@ -83,15 +140,7 @@ export default function GenerateMigrationReport() {
       {result && (
         <>
           <Card>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-gray-700">Quick Summary</h2>
-              <button
-                onClick={() => navigate("/reports")}
-                className="text-xs text-dec-blue hover:underline cursor-pointer"
-              >
-                View all reports →
-              </button>
-            </div>
+            <h2 className="text-sm font-semibold text-gray-700 mb-3">Quick Summary</h2>
             <pre className="text-xs bg-surface rounded p-3 overflow-x-auto max-h-64 whitespace-pre-wrap">
               {result.quickReport}
             </pre>
@@ -104,6 +153,105 @@ export default function GenerateMigrationReport() {
           </Card>
         </>
       )}
+
+      <div className="grid grid-cols-3 gap-5">
+        <div className="space-y-4">
+          <Card>
+            <h2 className="text-sm font-semibold text-gray-700 mb-3">Upload .md Report</h2>
+            <label className="block mb-2">
+              <span className="px-3 py-1.5 text-sm border border-border rounded cursor-pointer hover:bg-surface inline-block">
+                Choose .md file
+              </span>
+              <input
+                type="file"
+                accept=".md"
+                className="hidden"
+                onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+            {uploadFile && <p className="text-xs text-gray-500 mb-2 font-mono">{uploadFile.name}</p>}
+            <label className="space-y-1 block mb-3">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Locale</span>
+              <select
+                className="w-full border border-border rounded px-3 py-2 text-sm"
+                value={uploadLocale}
+                onChange={(e) => setUploadLocale(e.target.value as Locale)}
+              >
+                {Object.entries(Locale).map(([name, val]) => (
+                  <option key={val} value={val}>{name} ({val})</option>
+                ))}
+              </select>
+            </label>
+            <Button
+              onClick={handleUpload}
+              disabled={!uploadFile || uploadLoading}
+              loading={uploadLoading}
+              variant="secondary"
+              className="w-full"
+            >
+              Upload
+            </Button>
+          </Card>
+
+          <div className="bg-white rounded-lg border border-border overflow-hidden">
+            <div className="px-4 py-2.5 border-b border-border bg-gray-50">
+              <span className="text-sm font-semibold text-gray-700">Saved Reports</span>
+              {reports && <span className="ml-2 text-xs text-gray-400">{reports.length}</span>}
+            </div>
+            <div className="divide-y divide-[#f0f0f0] max-h-96 overflow-y-auto">
+              {!reports || reports.length === 0 ? (
+                <p className="px-4 py-6 text-sm text-gray-400 text-center">No reports yet.</p>
+              ) : (
+                reports.map((r: { _id: Id<"reports">; name: string; locale: string; generatedAt: number }) => (
+                  <div
+                    key={r._id as string}
+                    className={`px-3 py-2.5 cursor-pointer hover:bg-gray-50 flex items-start justify-between gap-2 ${selectedId === r._id ? "bg-dec-blue-light" : ""}`}
+                    onClick={() => openReport(r._id as Id<"reports">)}
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-800 truncate">{r.name}</p>
+                      <p className="text-xs text-gray-400">{r.locale} · {formatDate(r.generatedAt)}</p>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(r._id as Id<"reports">); }}
+                      className="text-xs text-red-400 hover:text-red-600 cursor-pointer shrink-0 mt-0.5"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="col-span-2">
+          {selectedReport ? (
+            <div className="bg-white rounded-lg border border-border overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-gray-50">
+                <div>
+                  <h2 className="text-sm font-semibold text-gray-800">{selectedReport.name}</h2>
+                  <p className="text-xs text-gray-400">{selectedReport.locale} · {formatDate(selectedReport.generatedAt)}</p>
+                </div>
+                <button
+                  onClick={() => { setSelectedId(null); setSearchParams({}); }}
+                  className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+              <div
+                className="report-content p-6 overflow-y-auto max-h-[70vh]"
+                dangerouslySetInnerHTML={{ __html: renderedHtml ?? "" }}
+              />
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg border border-border flex items-center justify-center h-64">
+              <p className="text-sm text-gray-400">Select a saved report to view it</p>
+            </div>
+          )}
+        </div>
+      </div>
 
       <LogsPanel filterType="generate_report" />
     </div>

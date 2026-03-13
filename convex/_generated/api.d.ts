@@ -25,10 +25,14 @@ import type * as lib_sphere_retrieve from "../lib/sphere/retrieve.js";
 import type * as lib_sphere_types from "../lib/sphere/types.js";
 import type * as lib_utils from "../lib/utils.js";
 import type * as operations_checkSyncStatus from "../operations/checkSyncStatus.js";
+import type * as operations_cleanEntries from "../operations/cleanEntries.js";
 import type * as operations_deleteEntries from "../operations/deleteEntries.js";
+import type * as operations_enrichSportCategories from "../operations/enrichSportCategories.js";
 import type * as operations_generateMigrationReport from "../operations/generateMigrationReport.js";
+import type * as operations_generateSportGroupMapping from "../operations/generateSportGroupMapping.js";
 import type * as operations_massFieldUpdate from "../operations/massFieldUpdate.js";
 import type * as operations_massImport from "../operations/massImport.js";
+import type * as operations_seedSportCategories from "../operations/seedSportCategories.js";
 import type * as operations_sphereImport from "../operations/sphereImport.js";
 import type * as operations_syncUKCategoryTaxonomies from "../operations/syncUKCategoryTaxonomies.js";
 import type * as services_contentstack from "../services/contentstack.js";
@@ -37,6 +41,8 @@ import type * as services_logs from "../services/logs.js";
 import type * as services_reports from "../services/reports.js";
 import type * as services_settings from "../services/settings.js";
 import type * as services_sphere from "../services/sphere.js";
+import type * as services_sportCategories from "../services/sportCategories.js";
+import type * as services_sportGroupMappings from "../services/sportGroupMappings.js";
 
 import type {
   ApiFromModules,
@@ -62,10 +68,14 @@ declare const fullApi: ApiFromModules<{
   "lib/sphere/types": typeof lib_sphere_types;
   "lib/utils": typeof lib_utils;
   "operations/checkSyncStatus": typeof operations_checkSyncStatus;
+  "operations/cleanEntries": typeof operations_cleanEntries;
   "operations/deleteEntries": typeof operations_deleteEntries;
+  "operations/enrichSportCategories": typeof operations_enrichSportCategories;
   "operations/generateMigrationReport": typeof operations_generateMigrationReport;
+  "operations/generateSportGroupMapping": typeof operations_generateSportGroupMapping;
   "operations/massFieldUpdate": typeof operations_massFieldUpdate;
   "operations/massImport": typeof operations_massImport;
+  "operations/seedSportCategories": typeof operations_seedSportCategories;
   "operations/sphereImport": typeof operations_sphereImport;
   "operations/syncUKCategoryTaxonomies": typeof operations_syncUKCategoryTaxonomies;
   "services/contentstack": typeof services_contentstack;
@@ -74,6 +84,8 @@ declare const fullApi: ApiFromModules<{
   "services/reports": typeof services_reports;
   "services/settings": typeof services_settings;
   "services/sphere": typeof services_sphere;
+  "services/sportCategories": typeof services_sportCategories;
+  "services/sportGroupMappings": typeof services_sportGroupMappings;
 }>;
 
 /**

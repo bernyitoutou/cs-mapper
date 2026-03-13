@@ -49,7 +49,7 @@ export default function SphereImport() {
   }
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="page-limit-1440 space-y-6">
       <button onClick={() => navigate("/")} className="text-sm text-dec-blue hover:underline cursor-pointer">
         ← Back
       </button>
