@@ -59,6 +59,7 @@ export default function SyncDashboard({ settings }: { settings: Settings }) {
   const sphereImport = useAction(api.sync.sphereImport);
 
   async function runSphereImport() {
+    if (!importForm.dryRun && !confirm(`Run live Sphere import into ContentStack?\nLocale: ${importForm.locale}\nContent type: ${importForm.csContentTypeUid}\n\nThis will create/update/publish entries. Continue?`)) return;
     setImportLoading(true);
     setImportResult(null);
     try {

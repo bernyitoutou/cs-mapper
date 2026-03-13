@@ -59,6 +59,8 @@ export default function MassImport({ settings: _settings }: { settings: Settings
 
   async function runImport() {
     if (!items) return;
+    const verb = options.publishAfterCreate ? "create and publish" : "create";
+    if (!confirm(`About to ${verb} ${items.length} entries in "${options.contentTypeUid}" (${options.locale}).\n\nThis cannot be undone. Continue?`)) return;
     setLoading(true);
     setResult(null);
     try {

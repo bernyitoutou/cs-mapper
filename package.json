@@ -2,7 +2,6 @@
   "name": "cs-mapper",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "env:staging": "node scripts/set-convex-env.mjs staging",
     "env:production": "node scripts/set-convex-env.mjs production",
