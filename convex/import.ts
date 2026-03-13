@@ -6,8 +6,7 @@ import { v } from "convex/values";
 import { config } from "./lib/config.js";
 import { ContentstackError } from "./lib/contentstack/client.js";
 import { createEntry, deleteEntry, publishEntry, updateEntry } from "./lib/contentstack/update.js";
-import { localeValidator } from "./lib/locales.js";
-import { Locale } from "./lib/contentstack/types";
+import { localeValidator, Locale } from "./lib/locales.js";
 import { ContentType, contentTypeValidator } from "./lib/contentstack/types";
 
 /**

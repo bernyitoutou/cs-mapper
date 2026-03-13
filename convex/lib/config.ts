@@ -2,6 +2,8 @@
 // via the Convex dashboard or CLI (`npx convex env set KEY value`).
 // Locally they are picked up from .env.local.
 
+import { Branch, Environment } from "./contentstack/types";
+
 function require(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`Missing environment variable: ${name}`);
@@ -12,17 +14,43 @@ function optional(name: string): string | undefined {
   return process.env[name] ?? undefined;
 }
 
+type Config = {
+  contentstack: {
+    apiKey: string;
+    deliveryToken: string;
+    managementToken: string;
+    environment: Environment;
+    branch: Branch;
+    deliveryHost: string;
+    managementHost: string;
+  };
+  sphere: {
+    host: string;
+    apiKey: string;
+    pixlHost?: string;
+    rendererUrl: string;
+    contentTypesIds: Record<string, string>;
+  };
+  fedid: {
+    host: string;
+    tokenUrl: string;
+    clientId: string;
+    clientSecret: string;
+    basic?: string;
+  };
+}
+
 // Each sub-config uses a getter so env vars are only read when first accessed.
 // This allows scripts that only need one sub-config (e.g. fedid) to import this
 // file without requiring unrelated env vars to be set.
-export const config = {
+export const config: Config = {
   get contentstack() {
     return {
       apiKey: require("CS_STACK_API_KEY"),
       deliveryToken: require("CS_DELIVERY_TOKEN"),
       managementToken: require("CS_MANAGEMENT_TOKEN"),
-      environment: require("CS_ENVIRONMENT"),
-      branch: optional("CS_BRANCH") ?? "main",
+      environment: (require("CS_ENVIRONMENT") as Environment) ?? Environment.Staging,
+      branch: (optional("CS_BRANCH") as Branch) ?? Branch.Dev,
       deliveryHost: require("CS_DELIVERY_HOST").replace(/\/$/, ""),
       managementHost: require("CS_MANAGEMENT_HOST").replace(/\/$/, ""),
     };

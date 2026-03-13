@@ -1,4 +1,5 @@
 import { config } from "../config.js";
+import { Locale } from "../locales.js";
 import { managementDelete, managementPost, managementPut } from "./client.js";
 import type {
   BulkPublishParams,
@@ -120,7 +121,7 @@ export async function publishEntry(
   entryUid: string,
   params: PublishEntryParams = {
     environments: [config.contentstack.environment],
-    locales: ["en-US"],
+    locales: [Locale.EnGb],
   },
   /** When set, publish is scoped to that locale (required for localized entries). */
   locale?: string
@@ -147,7 +148,7 @@ export async function unpublishEntry(
   entryUid: string,
   params: PublishEntryParams = {
     environments: [config.contentstack.environment],
-    locales: ["en-US"],
+    locales: [Locale.EnGb],
   }
 ): Promise<void> {
   await managementPost(

@@ -32,13 +32,18 @@ export function setNestedValue(
 ): Record<string, unknown> {
   const keys = path.split(".");
   let current: Record<string, unknown> = obj;
+
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
+    if(!key) continue;
     if (current[key] == null || typeof current[key] !== "object") {
       current[key] = {};
     }
     current = current[key] as Record<string, unknown>;
   }
-  current[keys[keys.length - 1]] = value;
+  const lastKey = keys[keys.length - 1];
+  if (lastKey !== undefined && lastKey !== "") {
+    current[lastKey] = value;
+  }
   return obj;
 }

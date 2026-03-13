@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { Locale } from "../locales";
 
 // ---------------------------------------------------------------------------
 // Enums — Content Types, Taxonomy, Environment, Branch
@@ -48,29 +49,6 @@ export const branchValidator = v.union(
 
 // ---------------------------------------------------------------------------
 
-
-export enum Locale {
-  EnGb = "en-GB",
-  EnUs = "en-US",
-  FrFr = "fr-FR",
-  DeDe = "de-DE",
-  EsEs = "es-ES",
-  ItIt = "it-IT",
-  JaJp = "ja-JP",
-  ZhCn = "zh-CN",
-}
-
-export const localeValidator = v.union(
-  v.literal(Locale.EnGb),
-  v.literal(Locale.EnUs),
-  v.literal(Locale.FrFr),
-  v.literal(Locale.DeDe),
-  v.literal(Locale.EsEs),
-  v.literal(Locale.ItIt),
-  v.literal(Locale.JaJp),
-  v.literal(Locale.ZhCn)
-);
-
 export type Pagination = {
   /** Max entries per page (CS max is 250) */
   limit?: number;
@@ -79,8 +57,8 @@ export type Pagination = {
 };
 
 export type PublishDetails = {
-  environment: string;
-  locale: string;
+  environment: Environment;
+  locale: Locale;
   time: string;
   user: string;
   version?: number;
@@ -90,7 +68,7 @@ export type PublishDetails = {
 export type EntrySystemFields = {
   uid: string;
   title: string;
-  locale: string;
+  locale: Locale;
   _version: number;
   created_at: string;
   updated_at: string;
@@ -206,8 +184,8 @@ export type UpdateEntryPayload = {
 };
 
 export type PublishEntryParams = {
-  environments: string[];
-  locales: string[];
+  environments: Environment[];
+  locales: Locale[];
   /** ISO datetime for scheduled publishing */
   scheduledAt?: string;
 };
@@ -220,14 +198,14 @@ export type BulkPublishItem = {
 
 export type BulkPublishParams = {
   entries: BulkPublishItem[];
-  environments: string[];
-  locales: string[];
+  environments: Environment[];
+  locales: Locale[];
   action: "publish" | "unpublish";
 };
 
 export type BulkUpdateParams = {
   content_type: string;
-  entries: Array<{ uid: string; locale: string }>;
+  entries: Array<{ uid: string; locale: Locale }>;
   update: Record<string, unknown>;
 };
 
