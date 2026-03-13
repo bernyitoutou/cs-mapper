@@ -191,9 +191,9 @@ export type PublishEntryParams = {
 };
 
 export type BulkPublishItem = {
-  content_type: string;
+  content_type: ContentType;
   uid: string;
-  locale: string;
+  locale: Locale;
 };
 
 export type BulkPublishParams = {
@@ -204,7 +204,7 @@ export type BulkPublishParams = {
 };
 
 export type BulkUpdateParams = {
-  content_type: string;
+  content_type: ContentType;
   entries: Array<{ uid: string; locale: Locale }>;
   update: Record<string, unknown>;
 };

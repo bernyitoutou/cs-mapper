@@ -3,6 +3,7 @@ import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 import { Locale } from "@convex/lib/locales";
 
 export default function Reports() {
@@ -69,7 +70,7 @@ export default function Reports() {
   }
 
   const renderedHtml = selectedReport?.content
-    ? (marked(selectedReport.content) as string)
+    ? DOMPurify.sanitize(marked(selectedReport.content) as string)
     : null;
 
   return (

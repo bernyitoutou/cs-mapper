@@ -1,5 +1,6 @@
 import { config } from "../config.js";
 import type { SphereApiError } from "./types.js";
+import { withRetry } from "../utils.js";
 
 export class SphereError extends Error {
   constructor(
@@ -36,31 +37,37 @@ export async function sphereGet<T>(
   path: string,
   searchParams: Record<string, string> = {}
 ): Promise<T> {
-  const url = new URL(`${config.sphere.host}${path}`);
-  for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
+  return withRetry(async () => {
+    const url = new URL(`${config.sphere.host}${path}`);
+    for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
 
-  const res = await fetch(url.toString(), { method: "GET", headers: baseHeaders() });
-  return handleResponse<T>(res);
+    const res = await fetch(url.toString(), { method: "GET", headers: baseHeaders() });
+    return handleResponse<T>(res);
+  });
 }
 
 export async function spherePost<T>(path: string, body: unknown): Promise<T> {
-  const url = new URL(`${config.sphere.host}${path}`);
-  const res = await fetch(url.toString(), {
-    method: "POST",
-    headers: baseHeaders(),
-    body: JSON.stringify(body),
+  return withRetry(async () => {
+    const url = new URL(`${config.sphere.host}${path}`);
+    const res = await fetch(url.toString(), {
+      method: "POST",
+      headers: baseHeaders(),
+      body: JSON.stringify(body),
+    });
+    return handleResponse<T>(res);
   });
-  return handleResponse<T>(res);
 }
 
 export async function spherePut<T>(path: string, body: unknown): Promise<T> {
-  const url = new URL(`${config.sphere.host}${path}`);
-  const res = await fetch(url.toString(), {
-    method: "PUT",
-    headers: baseHeaders(),
-    body: JSON.stringify(body),
+  return withRetry(async () => {
+    const url = new URL(`${config.sphere.host}${path}`);
+    const res = await fetch(url.toString(), {
+      method: "PUT",
+      headers: baseHeaders(),
+      body: JSON.stringify(body),
+    });
+    return handleResponse<T>(res);
   });
-  return handleResponse<T>(res);
 }
 
 /**
@@ -72,10 +79,12 @@ export async function spherePut<T>(path: string, body: unknown): Promise<T> {
  * @param uuid - Sphere content UUID
  */
 export async function getContentHTMLByUUID(uuid: string): Promise<string> {
-  const url = `${config.sphere.rendererUrl}/content/${uuid}`;
-  const res = await fetch(url, { method: "GET" });
-  if (!res.ok) {
-    throw new SphereError(res.status, `Renderer failed for UUID ${uuid}: ${res.statusText}`);
-  }
-  return res.text();
+  return withRetry(async () => {
+    const url = `${config.sphere.rendererUrl}/content/${uuid}`;
+    const res = await fetch(url, { method: "GET" });
+    if (!res.ok) {
+      throw new SphereError(res.status, `Renderer failed for UUID ${uuid}: ${res.statusText}`);
+    }
+    return res.text();
+  });
 }

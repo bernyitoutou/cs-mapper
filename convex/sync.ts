@@ -1,6 +1,7 @@
 "use node";
 
 import { action } from "./_generated/server";
+import { api } from "./_generated/api";
 import { v } from "convex/values";
 
 import { getAllEntries, getAllManagedEntries } from "./lib/contentstack/retrieve.js";
@@ -44,7 +45,7 @@ export const checkSyncStatus = action({
     locale: localeValidator,
   },
 
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
 
     // 1. Fetch all published Sphere items
     const sphereItems = await getAllSphereContents({
@@ -142,6 +143,13 @@ export const checkSyncStatus = action({
     console.log(`  ⚠️  Only in CS      : ${report.summary.sync.onlyInContentStack}`);
     console.log("==========================\n");
 
+    await ctx.runMutation(api.logs.writelog, {
+      type: "checkSyncStatus",
+      status: "success",
+      params: args,
+      result: { summary: report.summary },
+    });
+
     return report;
   },
 });
@@ -173,7 +181,7 @@ export const sphereImport = action({
     dryRun: v.optional(v.boolean()),
   },
 
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
     const { locale, sphereContentTypeId, csContentTypeUid, dryRun = false } = args;
     const allSportIds = allSportIdsData as string[];
 
@@ -232,19 +240,27 @@ export const sphereImport = action({
             continue;
           }
           const newEntry = await createEntry(csContentTypeUid, mappedData, locale);
-          await publishEntry(csContentTypeUid, newEntry.uid, publishParams, locale);
+          try {
+            await publishEntry(csContentTypeUid, newEntry.uid, publishParams, locale);
+          } catch (publishErr) {
+            // Roll back the orphaned draft to keep CS clean
+            try { await deleteEntry(csContentTypeUid, newEntry.uid); } catch { /* best-effort */ }
+            throw publishErr;
+          }
           created.push(sphereId);
         } else {
           // Check if update needed: date changed OR taxonomies are out of sync
           const sphereUpdatedAt = sphereEntry.updated_at;
           const csLastUpdate = csEntry["last_sphere_update"];
+          const sphereDate = typeof sphereUpdatedAt === "string" ? new Date(sphereUpdatedAt) : null;
+          const csDate = typeof csLastUpdate === "string" ? new Date(csLastUpdate) : null;
+          // Treat an invalid or missing csLastUpdate as "never updated" → always sync
           const dateChanged =
-            typeof sphereUpdatedAt === "string" &&
-            typeof csLastUpdate === "string" &&
-            new Date(sphereUpdatedAt) > new Date(csLastUpdate);
+            sphereDate != null &&
+            !isNaN(sphereDate.getTime()) &&
+            (csDate == null || isNaN(csDate.getTime()) || sphereDate > csDate);
 
           const csTaxonomies = csEntry["taxonomies"];
-          const expectedTerms = new Set(mappedData["taxonomies"] as Array<{ term_uid: string }>);
           const actualTerms = new Set(
             Array.isArray(csTaxonomies)
               ? (csTaxonomies as Array<{ term_uid: string }>).map((t) => t.term_uid)
@@ -258,7 +274,6 @@ export const sphereImport = action({
             expectedTermUids.some((uid) => !actualTerms.has(uid));
 
           const needsUpdate = dateChanged || taxonomiesOutOfSync;
-          void expectedTerms;
 
           if (!needsUpdate) {
             skipped.push(sphereId);
@@ -298,6 +313,14 @@ export const sphereImport = action({
     console.log(`  branch=${branch}, env=${environment}`);
     console.log("====================\n");
 
+    await ctx.runMutation(api.logs.writelog, {
+      type: "sphereImport",
+      status: failed.length === 0 ? "success" : "error",
+      params: { locale, sphereContentTypeId, csContentTypeUid, dryRun },
+      result: { summary },
+      error: failed.length > 0 ? `${failed.length} item(s) failed` : undefined,
+    });
+
     return { summary, params: { locale, sphereContentTypeId, csContentTypeUid, dryRun }, failed };
   },
 });
@@ -320,7 +343,7 @@ export const deleteEntries = action({
     locale: localeValidator,
   },
 
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
     const { csContentTypeUid, locale } = args;
     const { environment } = config.contentstack;
 
@@ -353,6 +376,14 @@ export const deleteEntries = action({
     console.log(`  ✗  Failed  : ${failed.length}`);
     console.log(`======================\n`);
 
+    await ctx.runMutation(api.logs.writelog, {
+      type: "deleteEntries",
+      status: failed.length === 0 ? "success" : "error",
+      params: { csContentTypeUid, locale },
+      result: { summary: { total: entries.length, deleted: deleted.length, failed: failed.length } },
+      error: failed.length > 0 ? `${failed.length} item(s) failed` : undefined,
+    });
+
     return { summary: { total: entries.length, deleted: deleted.length, failed: failed.length }, failed };
   },
 });
@@ -384,7 +415,7 @@ export const massFieldUpdate = action({
     publishAfterUpdate: v.optional(v.boolean()),
   },
 
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
     const { csContentTypeUid, locale, field, value, publishAfterUpdate = false } = args;
     const { environment } = config.contentstack;
 
@@ -423,6 +454,14 @@ export const massFieldUpdate = action({
     console.log(`  ✗  Failed  : ${failed.length}`);
     console.log(`=========================\n`);
 
+    await ctx.runMutation(api.logs.writelog, {
+      type: "massFieldUpdate",
+      status: failed.length === 0 ? "success" : "error",
+      params: { csContentTypeUid, locale, field, value: JSON.stringify(value), publishAfterUpdate },
+      result: { summary: { total: entries.length, updated: updated.length, failed: failed.length } },
+      error: failed.length > 0 ? `${failed.length} item(s) failed` : undefined,
+    });
+
     return { summary: { total: entries.length, updated: updated.length, failed: failed.length }, failed };
   },
 });
@@ -458,7 +497,7 @@ export const syncUKCategoryTaxonomies = action({
     dryRun: v.optional(v.boolean()),
   },
 
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
     const { locale, dryRun = false } = args;
     const { environment } = config.contentstack;
     const TAXONOMY_UID = "sport_category";
@@ -582,7 +621,12 @@ export const syncUKCategoryTaxonomies = action({
             { ...mapped, taxonomies: finalTaxonomies },
             locale
           );
-          await publishEntry("blog_post", newEntry.uid, publishParams, locale);
+          try {
+            await publishEntry("blog_post", newEntry.uid, publishParams, locale);
+          } catch (publishErr) {
+            try { await deleteEntry("blog_post", newEntry.uid); } catch { /* best-effort */ }
+            throw publishErr;
+          }
           created.push(sphereArticleId);
         }
       } catch (err) {
@@ -611,6 +655,14 @@ export const syncUKCategoryTaxonomies = action({
     console.log(`  ✗  Failed  : ${summary.failed}`);
     console.log(`  env=${environment}`);
     console.log(`====================================\n`);
+
+    await ctx.runMutation(api.logs.writelog, {
+      type: "syncUKCategoryTaxonomies",
+      status: failed.length === 0 ? "success" : "error",
+      params: { locale, dryRun },
+      result: { summary },
+      error: failed.length > 0 ? `${failed.length} item(s) failed` : undefined,
+    });
 
     return { summary, params: { locale, dryRun }, failed };
   },

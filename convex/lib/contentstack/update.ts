@@ -30,24 +30,10 @@ export async function deleteEntry(
   const sp: Record<string, string> = {};
   if (locale) sp["locale"] = locale.toLowerCase();
 
-  const path = `/content_types/${contentTypeUid}/entries/${entryUid}`;
-  // managementDelete doesn't support searchParams — build URL manually
-  const { managementHost, apiKey, managementToken, branch } = config.contentstack;
-  const url = new URL(`${managementHost}/v3${path}`);
-  for (const [k, v] of Object.entries(sp)) url.searchParams.set(k, v);
-
-  const res = await fetch(url.toString(), {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      api_key: apiKey,
-      authorization: managementToken,
-      branch,
-    },
-  });
-  if (!res.ok) {
-    throw new Error(`[${res.status}] Failed to delete entry ${entryUid}${locale ? ` (locale: ${locale})` : ""}`);
-  }
+  await managementDelete(
+    `/content_types/${contentTypeUid}/entries/${entryUid}`,
+    sp
+  );
 }
 
 /**

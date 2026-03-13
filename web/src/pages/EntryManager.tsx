@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LogsPanel from "../components/LogsPanel";
@@ -45,7 +45,12 @@ export default function EntryManager({ settings }: { settings: Settings }) {
   const getBulkJobStatus = useAction(api.contentstack.csGetBulkJobStatus);
   const writelog = useMutation(api.logs.writelog);
 
-  async function runSearch() {
+  const bulkAbortRef = useRef(false);
+  // Abort any in-flight bulk poll when the component unmounts
+  useEffect(() => () => { bulkAbortRef.current = true; }, []);
+
+  async function runSearchWith(overrideSkip?: number) {
+    const skip = overrideSkip ?? search.skip;
     setSearchLoading(true);
     try {
       const result = await getEntries({
@@ -53,7 +58,7 @@ export default function EntryManager({ settings }: { settings: Settings }) {
         locale: search.locale ? search.locale : undefined,
         query: search.query || undefined,
         limit: search.limit,
-        skip: search.skip,
+        skip,
       });
       const r = result as { entries: CSEntry[]; count?: number };
       setEntries(r.entries ?? []);
@@ -63,6 +68,10 @@ export default function EntryManager({ settings }: { settings: Settings }) {
     } finally {
       setSearchLoading(false);
     }
+  }
+
+  async function runSearch() {
+    return runSearchWith();
   }
 
   // ── Selection for bulk ────────────────────────────────────────────────────
@@ -144,6 +153,7 @@ export default function EntryManager({ settings }: { settings: Settings }) {
   const [bulkLoading, setBulkLoading] = useState(false);
 
   async function executeBulk() {
+    bulkAbortRef.current = false;
     setBulkLoading(true);
     setBulkJobStatus("Starting…");
     try {
@@ -170,6 +180,7 @@ export default function EntryManager({ settings }: { settings: Settings }) {
       let done = false;
       while (!done) {
         await new Promise((r) => setTimeout(r, 2000));
+        if (bulkAbortRef.current) { setBulkLoading(false); return; }
         const status = (await getBulkJobStatus({ jobId })) as BulkJobResult;
         const jobStatus = status?.job_status ?? "unknown";
         setBulkJobStatus(`Job: ${jobStatus}`);
@@ -339,13 +350,21 @@ export default function EntryManager({ settings }: { settings: Settings }) {
           {/* Pagination */}
           <div className="flex items-center justify-between px-4 py-2 border-t border-[#e0e0e0] bg-gray-50">
             <button
-              onClick={() => { setSearch((s) => ({ ...s, skip: Math.max(0, s.skip - s.limit) })); runSearch(); }}
+              onClick={() => {
+                const newSkip = Math.max(0, search.skip - search.limit);
+                setSearch((s) => ({ ...s, skip: newSkip }));
+                runSearchWith(newSkip);
+              }}
               disabled={search.skip === 0}
               className="text-xs px-3 py-1 border border-[#e0e0e0] rounded cursor-pointer disabled:opacity-40"
             >← Prev</button>
             <span className="text-xs text-gray-500">Page {Math.floor(search.skip / search.limit) + 1}</span>
             <button
-              onClick={() => { setSearch((s) => ({ ...s, skip: s.skip + s.limit })); runSearch(); }}
+              onClick={() => {
+                const newSkip = search.skip + search.limit;
+                setSearch((s) => ({ ...s, skip: newSkip }));
+                runSearchWith(newSkip);
+              }}
               className="text-xs px-3 py-1 border border-[#e0e0e0] rounded cursor-pointer"
             >Next →</button>
           </div>
@@ -410,7 +429,7 @@ export default function EntryManager({ settings }: { settings: Settings }) {
 
       {/* Bulk publish modal */}
       {bulkModal && (
-        <Modal title={`Bulk ${bulkAction} — ${selected.size} entries`} onClose={() => setBulkModal(false)}>
+        <Modal title={`Bulk ${bulkAction} — ${selected.size} entries`} onClose={() => { bulkAbortRef.current = true; setBulkModal(false); }}>
           <div className="space-y-3">
             <div>
               <p className="text-xs font-medium text-gray-500 uppercase mb-1">Environments</p>

@@ -1,11 +1,13 @@
 "use node";
 
 import { action } from "./_generated/server";
+import { api } from "./_generated/api";
 import { v } from "convex/values";
 
 import { config } from "./lib/config.js";
 import { ContentstackError } from "./lib/contentstack/client.js";
 import { createEntry, deleteEntry, publishEntry, updateEntry } from "./lib/contentstack/update.js";
+import { getAllManagedEntries } from "./lib/contentstack/retrieve.js";
 import { localeValidator, Locale } from "./lib/locales.js";
 import { ContentType, contentTypeValidator } from "./lib/contentstack/types";
 
@@ -106,19 +108,47 @@ export const massImport = action({
      * @default false
      */
     publishAfterCreate: v.optional(v.boolean()),
+    /**
+     * Optional field path used for idempotency. If provided, existing entries
+     * are pre-fetched and any item whose value for this field already exists in
+     * ContentStack is skipped (not re-created).
+     * @example "sphere_id"
+     */
+    idempotencyField: v.optional(v.string()),
   },
 
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
     const shouldPublish = args.publishAfterCreate ?? false;
     const environment = config.contentstack.environment;
 
+    // Build idempotency set: pre-fetch existing entries once to avoid duplicates.
+    const existingFieldValues = new Set<string>();
+    if (args.idempotencyField) {
+      const existing = await getAllManagedEntries(args.contentTypeUid, { locale: args.locale });
+      for (const entry of existing) {
+        const val = entry[args.idempotencyField];
+        if (typeof val === "string") existingFieldValues.add(val);
+      }
+      console.log(`  Idempotency: ${existingFieldValues.size} existing values for "${args.idempotencyField}"`);
+    }
+
     const created: ImportedItem[] = [];
+    const skipped: ImportedItem[] = [];
     const failed: FailedItem[] = [];
 
     for (const rawItem of args.items) {
       const item = rawItem as Record<string, unknown>;
       const payload = stripSystemFields(item);
       let uid: string | undefined;
+
+      // ── Idempotency guard ───────────────────────────────────────────────
+      if (args.idempotencyField) {
+        const val = item[args.idempotencyField];
+        if (typeof val === "string" && existingFieldValues.has(val)) {
+          skipped.push({ uid: val, item });
+          continue;
+        }
+      }
 
       // ── Step 1: Create ──────────────────────────────────────────────────
       try {
@@ -172,6 +202,7 @@ export const massImport = action({
       summary: {
         total: args.items.length,
         created: created.length,
+        skipped: skipped.length,
         failed: failed.length,
       },
       params: {
@@ -182,6 +213,7 @@ export const massImport = action({
         environment,
       },
       created,
+      skipped,
       failed,
     };
 
@@ -194,6 +226,7 @@ export const massImport = action({
     console.log("");
     console.log(`  Total           : ${report.summary.total}`);
     console.log(`  ✅ Created       : ${report.summary.created}`);
+    console.log(`  ⏭  Skipped       : ${report.summary.skipped}`);
     console.log(`  ❌ Failed        : ${report.summary.failed}`);
     if (failed.length > 0) {
       console.log("\n  Failed items:");
@@ -202,6 +235,19 @@ export const massImport = action({
       }
     }
     console.log("==========================\n");
+
+    await ctx.runMutation(api.logs.writelog, {
+      type: "massImport",
+      status: failed.length === 0 ? "success" : "error",
+      params: {
+        contentTypeUid: args.contentTypeUid,
+        locale: args.locale,
+        total: args.items.length,
+        idempotencyField: args.idempotencyField,
+      },
+      result: { summary: report.summary },
+      error: failed.length > 0 ? `${failed.length} item(s) failed` : undefined,
+    });
 
     return report;
   },

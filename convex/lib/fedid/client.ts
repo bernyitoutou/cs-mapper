@@ -1,5 +1,6 @@
 import { config } from "../config.js";
 import type { FedIdApiError, FedIdTokenResponse, SportGroupListResponse } from "./types.js";
+import { withRetry } from "../utils.js";
 
 export class FedIdError extends Error {
   constructor(
@@ -20,28 +21,30 @@ function basicAuth(): string {
 
 /** Fetch a short-lived OAuth2 Bearer token from FedID using client_credentials flow. */
 export async function getAccessToken(): Promise<string> {
-  const res = await fetch(config.fedid.tokenUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${basicAuth()}`,
-    },
-    body: "grant_type=client_credentials",
-  });
+  return withRetry(async () => {
+    const res = await fetch(config.fedid.tokenUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${basicAuth()}`,
+      },
+      body: "grant_type=client_credentials",
+    });
 
-  if (!res.ok) {
-    let detail = res.statusText;
-    try {
-      const body = (await res.json()) as FedIdApiError;
-      detail = body.error_description ?? body.error ?? detail;
-    } catch {
-      // not JSON
+    if (!res.ok) {
+      let detail = res.statusText;
+      try {
+        const body = (await res.json()) as FedIdApiError;
+        detail = body.error_description ?? body.error ?? detail;
+      } catch {
+        // not JSON
+      }
+      throw new FedIdError(res.status, `Token request failed: ${detail}`);
     }
-    throw new FedIdError(res.status, `Token request failed: ${detail}`);
-  }
 
-  const data = (await res.json()) as FedIdTokenResponse;
-  return data.access_token;
+    const data = (await res.json()) as FedIdTokenResponse;
+    return data.access_token;
+  });
 }
 
 /** Perform a GET request against the Referential API using a Bearer token. */
@@ -50,31 +53,33 @@ export async function referentialGet<T>(
   token: string,
   searchParams: Record<string, string> = {}
 ): Promise<T> {
-  const url = new URL(`${config.fedid.host}${path}`);
-  for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
+  return withRetry(async () => {
+    const url = new URL(`${config.fedid.host}${path}`);
+    for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
 
-  const correlationId = crypto.randomUUID();
+    const correlationId = crypto.randomUUID();
 
-  const res = await fetch(url.toString(), {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "x-correlation-id": correlationId,
-    },
-  });
+    const res = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "x-correlation-id": correlationId,
+      },
+    });
 
-  if (!res.ok) {
-    let detail = res.statusText;
-    try {
-      const body = (await res.json()) as FedIdApiError;
-      detail = body.error_description ?? body.error ?? detail;
-    } catch {
-      // not JSON
+    if (!res.ok) {
+      let detail = res.statusText;
+      try {
+        const body = (await res.json()) as FedIdApiError;
+        detail = body.error_description ?? body.error ?? detail;
+      } catch {
+        // not JSON
+      }
+      throw new FedIdError(res.status, `Referential API error on ${path}: ${detail}`);
     }
-    throw new FedIdError(res.status, `Referential API error on ${path}: ${detail}`);
-  }
 
-  return res.json() as Promise<T>;
+    return res.json() as Promise<T>;
+  });
 }
 
 /** Fetch all sport groups for a given locale (locale format: "en_GB"). */

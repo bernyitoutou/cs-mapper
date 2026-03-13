@@ -27,7 +27,7 @@ import {
   updateEntry,
 } from "./lib/contentstack/update.js";
 import { localeValidator } from "./lib/locales";
-import { contentTypeValidator } from "./lib/contentstack/types";
+import { contentTypeValidator, environmentValidator } from "./lib/contentstack/types";
 
 // ---------------------------------------------------------------------------
 // Shared arg shapes (reused across actions)
@@ -60,7 +60,7 @@ export const csGetContentTypes = action({
 
 /** Get the full field schema of a single content type. */
 export const csGetContentType = action({
-  args: { contentTypeUid: v.string() },
+  args: { contentTypeUid: contentTypeValidator },
   handler: async (_ctx, { contentTypeUid }) => getContentType(contentTypeUid),
 });
 
@@ -71,7 +71,7 @@ export const csGetContentType = action({
 /** Get a single published entry by UID. */
 export const csGetEntry = action({
   args: {
-    contentTypeUid: v.string(),
+    contentTypeUid: contentTypeValidator,
     entryUid: v.string(),
     locale: v.optional(localeValidator),
     includeDepth: v.optional(v.number()),
@@ -82,7 +82,7 @@ export const csGetEntry = action({
 
 /** Get a page of published entries for a content type. */
 export const csGetEntries = action({
-  args: { contentTypeUid: v.string(), ...retrieveArgs },
+  args: { contentTypeUid: contentTypeValidator, ...retrieveArgs },
   handler: async (_ctx, { contentTypeUid, limit, skip, ...rest }) =>
     getEntries(contentTypeUid, {
       ...rest,
@@ -96,7 +96,7 @@ export const csGetEntries = action({
  */
 export const csGetAllEntries = action({
   args: {
-    contentTypeUid: v.string(),
+    contentTypeUid: contentTypeValidator,
     locale: v.optional(localeValidator),
     query: v.optional(v.string()),
     includeDepth: v.optional(v.number()),
@@ -111,7 +111,7 @@ export const csGetAllEntries = action({
 /** Count published entries matching an optional query. */
 export const csCountEntries = action({
   args: {
-    contentTypeUid: v.string(),
+    contentTypeUid: contentTypeValidator,
     locale: v.optional(localeValidator),
     query: v.optional(v.string()),
   },
@@ -126,7 +126,7 @@ export const csCountEntries = action({
 /** Get a single entry including unpublished drafts. */
 export const csGetManagedEntry = action({
   args: {
-    contentTypeUid: v.string(),
+    contentTypeUid: contentTypeValidator,
     entryUid: v.string(),
     locale: v.optional(localeValidator),
   },
@@ -136,7 +136,7 @@ export const csGetManagedEntry = action({
 
 /** Get a page of entries including drafts. */
 export const csGetManagedEntries = action({
-  args: { contentTypeUid: v.string(), ...retrieveArgs },
+  args: { contentTypeUid: contentTypeValidator, ...retrieveArgs },
   handler: async (_ctx, { contentTypeUid, limit, skip, ...rest }) =>
     getManagedEntries(contentTypeUid, {
       ...rest,
@@ -216,8 +216,8 @@ export const csPublishEntry = action({
   args: {
     contentTypeUid: contentTypeValidator,
     entryUid: v.string(),
-    environments: v.array(v.string()),
-    locales: v.array(v.string()),
+    environments: v.array(environmentValidator),
+    locales: v.array(localeValidator),
     scheduledAt: v.optional(v.string()),
   },
   handler: async (_ctx, { contentTypeUid, entryUid, ...params }) =>
@@ -229,8 +229,8 @@ export const csUnpublishEntry = action({
   args: {
     contentTypeUid: contentTypeValidator,
     entryUid: v.string(),
-    environments: v.array(v.string()),
-    locales: v.array(v.string()),
+    environments: v.array(environmentValidator),
+    locales: v.array(localeValidator),
     scheduledAt: v.optional(v.string()),
   },
   handler: async (_ctx, { contentTypeUid, entryUid, ...params }) =>
@@ -243,8 +243,8 @@ export const csBulkPublish = action({
     entries: v.array(
       v.object({ content_type: contentTypeValidator, uid: v.string(), locale: localeValidator })
     ),
-    environments: v.array(v.string()),
-    locales: v.array(v.string()),
+    environments: v.array(environmentValidator),
+    locales: v.array(localeValidator),
     action: v.union(v.literal("publish"), v.literal("unpublish")),
   },
   handler: async (_ctx, params) => bulkPublish(params),

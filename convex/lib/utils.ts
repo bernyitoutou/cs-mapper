@@ -47,3 +47,48 @@ export function setNestedValue(
   }
   return obj;
 }
+
+// ---------------------------------------------------------------------------
+// Async utilities
+// ---------------------------------------------------------------------------
+
+/** Sleep for `ms` milliseconds. */
+export const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Returns true for transient HTTP errors that are safe to retry:
+ * 429 Too Many Requests, 502/503/504 gateway errors, and fetch() network errors.
+ */
+export function isTransientError(err: unknown): boolean {
+  if (err != null && typeof err === "object" && "status" in err) {
+    return [429, 502, 503, 504].includes((err as { status: number }).status);
+  }
+  return err instanceof TypeError; // fetch() throws TypeError on network failures
+}
+
+/**
+ * Retry `fn` up to `maxRetries` times using exponential backoff.
+ * Only retries when `retryOn` returns true (defaults to `isTransientError`).
+ *
+ * @example
+ * const data = await withRetry(() => deliveryGet("/content_types/blog_post/entries"));
+ */
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  options: {
+    maxRetries?: number;
+    baseDelayMs?: number;
+    retryOn?: (err: unknown) => boolean;
+  } = {}
+): Promise<T> {
+  const { maxRetries = 3, baseDelayMs = 1000, retryOn = isTransientError } = options;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt >= maxRetries || !retryOn(err)) throw err;
+      const delay = baseDelayMs * Math.pow(2, attempt) + Math.random() * 200;
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+}

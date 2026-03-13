@@ -1,5 +1,6 @@
 import { config } from "../config.js";
 import type { ContentstackApiError } from "./types.js";
+import { withRetry } from "../utils.js";
 
 // ---------------------------------------------------------------------------
 // Error
@@ -43,20 +44,22 @@ export async function deliveryGet<T>(
   path: string,
   searchParams: Record<string, string> = {}
 ): Promise<T> {
-  const { deliveryHost, apiKey, deliveryToken, branch } = config.contentstack;
-  const url = new URL(`${deliveryHost}/v3${path}`);
-  for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
+  return withRetry(async () => {
+    const { deliveryHost, apiKey, deliveryToken, branch } = config.contentstack;
+    const url = new URL(`${deliveryHost}/v3${path}`);
+    for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
 
-  const res = await fetch(url.toString(), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      api_key: apiKey,
-      access_token: deliveryToken,
-      branch,
-    },
+    const res = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        api_key: apiKey,
+        access_token: deliveryToken,
+        branch,
+      },
+    });
+    return handleResponse<T>(res);
   });
-  return handleResponse<T>(res);
 }
 
 // ---------------------------------------------------------------------------
@@ -67,20 +70,22 @@ export async function managementGet<T>(
   path: string,
   searchParams: Record<string, string> = {}
 ): Promise<T> {
-  const { managementHost, apiKey, managementToken, branch } = config.contentstack;
-  const url = new URL(`${managementHost}/v3${path}`);
-  for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
+  return withRetry(async () => {
+    const { managementHost, apiKey, managementToken, branch } = config.contentstack;
+    const url = new URL(`${managementHost}/v3${path}`);
+    for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
 
-  const res = await fetch(url.toString(), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      api_key: apiKey,
-      authorization: managementToken,
-      branch,
-    },
+    const res = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        api_key: apiKey,
+        authorization: managementToken,
+        branch,
+      },
+    });
+    return handleResponse<T>(res);
   });
-  return handleResponse<T>(res);
 }
 
 export async function managementPut<T>(
@@ -88,21 +93,23 @@ export async function managementPut<T>(
   body: unknown,
   searchParams: Record<string, string> = {}
 ): Promise<T> {
-  const { managementHost, apiKey, managementToken, branch } = config.contentstack;
-  const url = new URL(`${managementHost}/v3${path}`);
-  for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
+  return withRetry(async () => {
+    const { managementHost, apiKey, managementToken, branch } = config.contentstack;
+    const url = new URL(`${managementHost}/v3${path}`);
+    for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
 
-  const res = await fetch(url.toString(), {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      api_key: apiKey,
-      authorization: managementToken,
-      branch,
-    },
-    body: JSON.stringify(body),
+    const res = await fetch(url.toString(), {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        api_key: apiKey,
+        authorization: managementToken,
+        branch,
+      },
+      body: JSON.stringify(body),
+    });
+    return handleResponse<T>(res);
   });
-  return handleResponse<T>(res);
 }
 
 export async function managementPost<T>(
@@ -110,35 +117,43 @@ export async function managementPost<T>(
   body: unknown,
   searchParams: Record<string, string> = {}
 ): Promise<T> {
-  const { managementHost, apiKey, managementToken, branch } = config.contentstack;
-  const url = new URL(`${managementHost}/v3${path}`);
-  for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
+  return withRetry(async () => {
+    const { managementHost, apiKey, managementToken, branch } = config.contentstack;
+    const url = new URL(`${managementHost}/v3${path}`);
+    for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
 
-  const res = await fetch(url.toString(), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      api_key: apiKey,
-      authorization: managementToken,
-      branch,
-    },
-    body: JSON.stringify(body),
+    const res = await fetch(url.toString(), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        api_key: apiKey,
+        authorization: managementToken,
+        branch,
+      },
+      body: JSON.stringify(body),
+    });
+    return handleResponse<T>(res);
   });
-  return handleResponse<T>(res);
 }
 
-export async function managementDelete<T>(path: string): Promise<T> {
-  const { managementHost, apiKey, managementToken, branch } = config.contentstack;
-  const url = new URL(`${managementHost}/v3${path}`);
+export async function managementDelete<T>(
+  path: string,
+  searchParams: Record<string, string> = {}
+): Promise<T> {
+  return withRetry(async () => {
+    const { managementHost, apiKey, managementToken, branch } = config.contentstack;
+    const url = new URL(`${managementHost}/v3${path}`);
+    for (const [k, v] of Object.entries(searchParams)) url.searchParams.set(k, v);
 
-  const res = await fetch(url.toString(), {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      api_key: apiKey,
-      authorization: managementToken,
-      branch,
-    },
+    const res = await fetch(url.toString(), {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        api_key: apiKey,
+        authorization: managementToken,
+        branch,
+      },
+    });
+    return handleResponse<T>(res);
   });
-  return handleResponse<T>(res);
 }

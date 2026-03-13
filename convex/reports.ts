@@ -12,7 +12,7 @@ export const saveReport = mutation({
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("reports")
-      .filter((q) => q.eq(q.field("name"), args.name))
+      .withIndex("by_name", (q) => q.eq("name", args.name))
       .first();
     if (existing) {
       await ctx.db.patch(existing._id, {

@@ -35,7 +35,13 @@ export const getLogs = query({
 export const clearLogs = mutation({
   args: {},
   handler: async (ctx) => {
-    const all = await ctx.db.query("operationLogs").collect();
-    await Promise.all(all.map((doc) => ctx.db.delete(doc._id)));
+    // Delete in batches of 500 to stay within Convex mutation memory/write limits
+    while (true) {
+      const batch = await ctx.db.query("operationLogs").take(500);
+      if (batch.length === 0) break;
+      for (const doc of batch) {
+        await ctx.db.delete(doc._id);
+      }
+    }
   },
 });

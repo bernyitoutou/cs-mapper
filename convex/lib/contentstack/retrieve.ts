@@ -1,4 +1,5 @@
 import { deliveryGet, managementGet } from "./client.js";
+import { sleep } from "../utils.js";
 import type {
   Asset,
   ContentTypeDefinition,
@@ -56,6 +57,7 @@ export async function getContentTypes(): Promise<ContentTypeDefinition[]> {
   let skip = 0;
 
   while (true) {
+    if (collected.length > 0) await sleep(100);
     const data = await managementGet<GetContentTypesResponse>("/content_types", {
       include_count: "true",
       limit: String(CS_MAX_LIMIT),
@@ -131,6 +133,7 @@ export async function getAllEntries<
   let skip = 0;
 
   while (true) {
+    if (collected.length > 0) await sleep(100);
     const { entries, count } = await getEntries<T>(contentTypeUid, {
       ...params,
       pagination: { limit: CS_MAX_LIMIT, skip },
@@ -211,6 +214,7 @@ export async function getAllManagedEntries<
   let skip = 0;
 
   while (true) {
+    if (collected.length > 0) await sleep(100);
     const { entries, count } = await getManagedEntries<T>(contentTypeUid, {
       ...params,
       pagination: { limit: CS_MAX_LIMIT, skip },
@@ -246,6 +250,7 @@ export async function getAllAssets(
   let skip = 0;
 
   while (true) {
+    if (collected.length > 0) await sleep(100);
     const { assets, count } = await getAssets({
       ...params,
       pagination: { limit: CS_MAX_LIMIT, skip },

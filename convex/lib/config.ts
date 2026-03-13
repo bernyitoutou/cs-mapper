@@ -4,7 +4,7 @@
 
 import { Branch, Environment } from "./contentstack/types";
 
-function require(name: string): string {
+function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`Missing environment variable: ${name}`);
   return value;
@@ -46,21 +46,21 @@ type Config = {
 export const config: Config = {
   get contentstack() {
     return {
-      apiKey: require("CS_STACK_API_KEY"),
-      deliveryToken: require("CS_DELIVERY_TOKEN"),
-      managementToken: require("CS_MANAGEMENT_TOKEN"),
-      environment: (require("CS_ENVIRONMENT") as Environment) ?? Environment.Staging,
+      apiKey: requireEnv("CS_STACK_API_KEY"),
+      deliveryToken: requireEnv("CS_DELIVERY_TOKEN"),
+      managementToken: requireEnv("CS_MANAGEMENT_TOKEN"),
+      environment: (requireEnv("CS_ENVIRONMENT") as Environment) ?? Environment.Staging,
       branch: (optional("CS_BRANCH") as Branch) ?? Branch.Dev,
-      deliveryHost: require("CS_DELIVERY_HOST").replace(/\/$/, ""),
-      managementHost: require("CS_MANAGEMENT_HOST").replace(/\/$/, ""),
+      deliveryHost: requireEnv("CS_DELIVERY_HOST").replace(/\/$/, ""),
+      managementHost: requireEnv("CS_MANAGEMENT_HOST").replace(/\/$/, ""),
     };
   },
   get sphere() {
     return {
-      host: require("SPHERE_HOST").replace(/\/$/, ""),
-      apiKey: require("SPHERE_API_KEY"),
+      host: requireEnv("SPHERE_HOST").replace(/\/$/, ""),
+      apiKey: requireEnv("SPHERE_API_KEY"),
       pixlHost: optional("SPHERE_PIXL_HOST")?.replace(/\/$/, ""),
-      rendererUrl: require("SPHERE_RENDERER_URL").replace(/\/$/, ""),
+      rendererUrl: requireEnv("SPHERE_RENDERER_URL").replace(/\/$/, ""),
       contentTypesIds: (() => {
         const raw = optional("SPHERE_CONTENT_TYPES_IDS");
         if (!raw) return {} as Record<string, string>;
@@ -70,10 +70,10 @@ export const config: Config = {
   },
   get fedid() {
     return {
-      host: require("FEDID_HOST").replace(/\/$/, ""),
-      tokenUrl: require("FEDID_TOKEN_URL"),
-      clientId: require("FEDID_CLIENT_ID"),
-      clientSecret: require("FEDID_CLIENT_SECRET"),
+      host: requireEnv("FEDID_HOST").replace(/\/$/, ""),
+      tokenUrl: requireEnv("FEDID_TOKEN_URL"),
+      clientId: requireEnv("FEDID_CLIENT_ID"),
+      clientSecret: requireEnv("FEDID_CLIENT_SECRET"),
       basic: optional("FEDID_BASIC"),
     };
   },

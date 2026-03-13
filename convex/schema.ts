@@ -16,7 +16,9 @@ export default defineSchema({
     content: v.string(),
     locale: v.string(),
     generatedAt: v.number(),
-  }).index("by_generatedAt", ["generatedAt"]),
+  })
+    .index("by_generatedAt", ["generatedAt"])
+    .index("by_name", ["name"]),
 
   appSettings: defineTable({
     key: v.string(),

@@ -1,4 +1,5 @@
 import { sphereGet, getContentHTMLByUUID, SphereError } from "./client.js";
+import { sleep } from "../utils.js";
 import type {
   SphereContent,
   SphereContentTypeDefinition,
@@ -196,6 +197,7 @@ export async function getAllSphereContents(
   let page = 1;
 
   while (true) {
+    if (collected.length > 0) await sleep(100);
     const result = await searchSphereContents({ ...params, page, perPage: DEFAULT_PER_PAGE });
     const members = result["hydra:member"];
     collected.push(...members);
