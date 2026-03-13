@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LogsPanel from "../../components/LogsPanel";
+import { OperationOverview } from "../../components/OperationOverview";
+import { OperationRunSection } from "../../components/OperationRunSection";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
@@ -59,61 +61,56 @@ export default function CheckSyncStatus() {
       <button onClick={() => navigate("/")} className="text-sm text-dec-blue hover:underline cursor-pointer">
         ← Back
       </button>
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">🔍</span>
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Check Sync Status</h1>
-          <p className="text-sm text-gray-500">Compare Sphere and ContentStack entries — shows sync rate and mismatches.</p>
-        </div>
-      </div>
+      <OperationOverview operationId="check-sync-status" />
+
+      <OperationRunSection operationId="check-sync-status">
+        <Card>
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label="Sphere type"
+              value={form.sphereContentTypeId}
+              onChange={(e) => setForm((f) => ({ ...f, sphereContentTypeId: e.target.value }))}
+            >
+              {Object.entries(SphereContentTypes).map(([name, id]) => (
+                <option key={id} value={id}>{name}</option>
+              ))}
+            </Select>
+            <Select
+              label="CS type"
+              value={form.csContentTypeUid}
+              onChange={(e) => setForm((f) => ({ ...f, csContentTypeUid: e.target.value as ContentType }))}
+            >
+              {Object.entries(ContentType).map(([name, uid]) => (
+                <option key={uid} value={uid}>{name} ({uid})</option>
+              ))}
+            </Select>
+            <Input
+              label="Sphere match field"
+              value={form.sphereMatchField}
+              onChange={(e) => setForm((f) => ({ ...f, sphereMatchField: e.target.value }))}
+            />
+            <Input
+              label="CS match field"
+              value={form.csMatchField}
+              onChange={(e) => setForm((f) => ({ ...f, csMatchField: e.target.value }))}
+            />
+            <Select
+              label="locale"
+              value={form.locale}
+              onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
+            >
+              {Object.entries(Locale).map(([name, val]) => (
+                <option key={val} value={val}>{name} ({val})</option>
+              ))}
+            </Select>
+          </div>
+          <div className="mt-4">
+            <Button onClick={run} loading={loading}>Check Sync Status</Button>
+          </div>
+        </Card>
+      </OperationRunSection>
 
       <ParamGuide params={operations.find((o) => o.id === "check-sync-status")!.paramsMeta} />
-
-      {/* Form */}
-      <Card>
-        <div className="grid grid-cols-2 gap-3">
-          <Select
-            label="Sphere type"
-            value={form.sphereContentTypeId}
-            onChange={(e) => setForm((f) => ({ ...f, sphereContentTypeId: e.target.value }))}
-          >
-            {Object.entries(SphereContentTypes).map(([name, id]) => (
-              <option key={id} value={id}>{name}</option>
-            ))}
-          </Select>
-          <Select
-            label="CS type"
-            value={form.csContentTypeUid}
-            onChange={(e) => setForm((f) => ({ ...f, csContentTypeUid: e.target.value as ContentType }))}
-          >
-            {Object.entries(ContentType).map(([name, uid]) => (
-              <option key={uid} value={uid}>{name} ({uid})</option>
-            ))}
-          </Select>
-          <Input
-            label="Sphere match field"
-            value={form.sphereMatchField}
-            onChange={(e) => setForm((f) => ({ ...f, sphereMatchField: e.target.value }))}
-          />
-          <Input
-            label="CS match field"
-            value={form.csMatchField}
-            onChange={(e) => setForm((f) => ({ ...f, csMatchField: e.target.value }))}
-          />
-          <Select
-            label="locale"
-            value={form.locale}
-            onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
-          >
-            {Object.entries(Locale).map(([name, val]) => (
-              <option key={val} value={val}>{name} ({val})</option>
-            ))}
-          </Select>
-        </div>
-        <div className="mt-4">
-          <Button onClick={run} loading={loading}>Check Sync Status</Button>
-        </div>
-      </Card>
 
       {/* Result */}
       {report?.summary && (

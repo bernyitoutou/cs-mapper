@@ -4,6 +4,8 @@ import { useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Locale } from "@convex/lib/locales";
 import LogsPanel from "../../components/LogsPanel";
+import { OperationOverview } from "../../components/OperationOverview";
+import { OperationRunSection } from "../../components/OperationRunSection";
 import { ParamGuide } from "../../components/ParamGuide";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
@@ -42,36 +44,30 @@ export default function GenerateSportGroupMapping() {
       >
         ← Back
       </button>
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">🗺️</span>
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Sport Group Mapping</h1>
-          <p className="text-sm text-gray-500">
-            Generate and persist sport group mappings from ContentStack and FedID.
-          </p>
-        </div>
-      </div>
+      <OperationOverview operationId="generate-sport-group-mapping" />
+
+      <OperationRunSection operationId="generate-sport-group-mapping">
+        <Card>
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label="locale"
+              value={locale}
+              onChange={(event) => setLocale(event.target.value as Locale)}
+            >
+              {Object.entries(Locale).map(([name, value]) => (
+                <option key={value} value={value}>
+                  {name} ({value})
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="mt-4">
+            <Button onClick={run} loading={loading}>Generate Mapping</Button>
+          </div>
+        </Card>
+      </OperationRunSection>
 
       <ParamGuide params={operation?.paramsMeta ?? []} />
-
-      <Card>
-        <div className="grid grid-cols-2 gap-3">
-          <Select
-            label="locale"
-            value={locale}
-            onChange={(event) => setLocale(event.target.value as Locale)}
-          >
-            {Object.entries(Locale).map(([name, value]) => (
-              <option key={value} value={value}>
-                {name} ({value})
-              </option>
-            ))}
-          </Select>
-        </div>
-        <div className="mt-4">
-          <Button onClick={run} loading={loading}>Generate Mapping</Button>
-        </div>
-      </Card>
 
       {result && (
         <Card>

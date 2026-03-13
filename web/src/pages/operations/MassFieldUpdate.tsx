@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LogsPanel from "../../components/LogsPanel";
+import { OperationOverview } from "../../components/OperationOverview";
+import { OperationRunSection } from "../../components/OperationRunSection";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
@@ -68,70 +70,66 @@ export default function MassFieldUpdate() {
       <button onClick={() => navigate("/")} className="text-sm text-dec-blue hover:underline cursor-pointer">
         ← Back
       </button>
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">✏️</span>
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Mass Field Update</h1>
-          <p className="text-sm text-gray-500">Set a single field value across all entries of a content type.</p>
-        </div>
-      </div>
+      <OperationOverview operationId="mass-field-update" />
+
+      <OperationRunSection operationId="mass-field-update">
+        <Card>
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label="content type"
+              value={form.csContentTypeUid}
+              onChange={(e) => setForm((f) => ({ ...f, csContentTypeUid: e.target.value as ContentType }))}
+            >
+              {Object.entries(ContentType).map(([name, uid]) => (
+                <option key={uid} value={uid}>{name} ({uid})</option>
+              ))}
+            </Select>
+            <Select
+              label="locale"
+              value={form.locale}
+              onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
+            >
+              {Object.entries(Locale).map(([name, val]) => (
+                <option key={val} value={val}>{name} ({val})</option>
+              ))}
+            </Select>
+            <Input
+              label="field path"
+              placeholder="e.g. is_active or metadata.robot_no_follow"
+              value={form.field}
+              onChange={(e) => setForm((f) => ({ ...f, field: e.target.value }))}
+              hint="Supports dot notation for nested fields"
+            />
+            <Input
+              label="value"
+              placeholder='e.g. false, "hello", 42'
+              value={form.valueRaw}
+              onChange={(e) => {
+                setForm((f) => ({ ...f, valueRaw: e.target.value }));
+                try { JSON.parse(e.target.value); setParseError(""); } catch { setParseError("Invalid JSON"); }
+              }}
+              error={parseError || undefined}
+              hint="Parsed as JSON; falls back to string"
+            />
+            <label className="flex items-center gap-2 col-span-2">
+              <input
+                type="checkbox"
+                checked={form.publishAfterUpdate}
+                onChange={(e) => setForm((f) => ({ ...f, publishAfterUpdate: e.target.checked }))}
+                className="w-4 h-4 accent-dec-blue"
+              />
+              <span className="text-sm text-gray-700">Publish after update</span>
+            </label>
+          </div>
+          <div className="mt-4">
+            <Button onClick={run} loading={loading} disabled={!form.field.trim()}>
+              Run Update
+            </Button>
+          </div>
+        </Card>
+      </OperationRunSection>
 
       <ParamGuide params={operations.find((o) => o.id === "mass-field-update")!.paramsMeta} />
-
-      <Card>
-        <div className="grid grid-cols-2 gap-3">
-          <Select
-            label="content type"
-            value={form.csContentTypeUid}
-            onChange={(e) => setForm((f) => ({ ...f, csContentTypeUid: e.target.value as ContentType }))}
-          >
-            {Object.entries(ContentType).map(([name, uid]) => (
-              <option key={uid} value={uid}>{name} ({uid})</option>
-            ))}
-          </Select>
-          <Select
-            label="locale"
-            value={form.locale}
-            onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
-          >
-            {Object.entries(Locale).map(([name, val]) => (
-              <option key={val} value={val}>{name} ({val})</option>
-            ))}
-          </Select>
-          <Input
-            label="field path"
-            placeholder="e.g. is_active or metadata.robot_no_follow"
-            value={form.field}
-            onChange={(e) => setForm((f) => ({ ...f, field: e.target.value }))}
-            hint="Supports dot notation for nested fields"
-          />
-          <Input
-            label="value"
-            placeholder='e.g. false, "hello", 42'
-            value={form.valueRaw}
-            onChange={(e) => {
-              setForm((f) => ({ ...f, valueRaw: e.target.value }));
-              try { JSON.parse(e.target.value); setParseError(""); } catch { setParseError("Invalid JSON"); }
-            }}
-            error={parseError || undefined}
-            hint="Parsed as JSON; falls back to string"
-          />
-          <label className="flex items-center gap-2 col-span-2">
-            <input
-              type="checkbox"
-              checked={form.publishAfterUpdate}
-              onChange={(e) => setForm((f) => ({ ...f, publishAfterUpdate: e.target.checked }))}
-              className="w-4 h-4 accent-dec-blue"
-            />
-            <span className="text-sm text-gray-700">Publish after update</span>
-          </label>
-        </div>
-        <div className="mt-4">
-          <Button onClick={run} loading={loading} disabled={!form.field.trim()}>
-            Run Update
-          </Button>
-        </div>
-      </Card>
 
       {result && (
         <Card>

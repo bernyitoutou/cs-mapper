@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LogsPanel from "../../components/LogsPanel";
+import { OperationOverview } from "../../components/OperationOverview";
+import { OperationRunSection } from "../../components/OperationRunSection";
 import { ParamGuide } from "../../components/ParamGuide";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
@@ -49,27 +51,21 @@ export default function SeedSportCategories() {
       >
         ← Back
       </button>
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">🌱</span>
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Seed Sport Categories</h1>
-          <p className="text-sm text-gray-500">
-            Bootstrap the sport categories table from the legacy JSON seed.
+      <OperationOverview operationId="seed-sport-categories" />
+
+      <OperationRunSection operationId="seed-sport-categories">
+        <Card>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            This is the one-time bridge from the legacy JSON file to Convex DB.
+            Re-running it will upsert existing rows.
           </p>
-        </div>
-      </div>
+          <div className="mt-4">
+            <Button onClick={run} loading={loading}>Seed Categories</Button>
+          </div>
+        </Card>
+      </OperationRunSection>
 
       <ParamGuide params={operation?.paramsMeta ?? []} />
-
-      <Card>
-        <p className="text-sm text-gray-600 leading-relaxed">
-          This is the one-time bridge from the legacy JSON file to Convex DB.
-          Re-running it will upsert existing rows.
-        </p>
-        <div className="mt-4">
-          <Button onClick={run} loading={loading}>Seed Categories</Button>
-        </div>
-      </Card>
 
       {result && (
         <Card>

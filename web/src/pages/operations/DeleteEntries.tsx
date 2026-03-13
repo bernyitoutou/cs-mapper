@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LogsPanel from "../../components/LogsPanel";
+import { OperationOverview } from "../../components/OperationOverview";
+import { OperationRunSection } from "../../components/OperationRunSection";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
@@ -49,47 +51,43 @@ export default function DeleteEntries() {
       <button onClick={() => navigate("/")} className="text-sm text-dec-blue hover:underline cursor-pointer">
         ← Back
       </button>
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">🗑️</span>
-        <div>
-          <h1 className="text-xl font-bold text-red-700">Delete Entries</h1>
-          <p className="text-sm text-gray-500">Unpublish and delete all entries for a locale. Irreversible.</p>
-        </div>
-      </div>
+      <OperationOverview operationId="delete-entries" titleClassName="text-red-700" />
 
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
-        ⚠️ <strong>Destructive operation.</strong> All entries of the selected content type for the given locale will be unpublished and permanently deleted.
-      </div>
+      <OperationRunSection operationId="delete-entries" danger>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
+          ⚠️ <strong>Destructive operation.</strong> All entries of the selected content type for the given locale will be unpublished and permanently deleted.
+        </div>
+
+        <Card>
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label="content type"
+              value={form.csContentTypeUid}
+              onChange={(e) => setForm((f) => ({ ...f, csContentTypeUid: e.target.value as ContentType }))}
+            >
+              {Object.entries(ContentType).map(([name, uid]) => (
+                <option key={uid} value={uid}>{name} ({uid})</option>
+              ))}
+            </Select>
+            <Select
+              label="locale"
+              value={form.locale}
+              onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
+            >
+              {Object.entries(Locale).map(([name, val]) => (
+                <option key={val} value={val}>{name} ({val})</option>
+              ))}
+            </Select>
+          </div>
+          <div className="mt-4">
+            <Button variant="danger" onClick={run} loading={loading}>
+              Delete All Entries
+            </Button>
+          </div>
+        </Card>
+      </OperationRunSection>
 
       <ParamGuide params={operations.find((o) => o.id === "delete-entries")!.paramsMeta} danger />
-
-      <Card>
-        <div className="grid grid-cols-2 gap-3">
-          <Select
-            label="content type"
-            value={form.csContentTypeUid}
-            onChange={(e) => setForm((f) => ({ ...f, csContentTypeUid: e.target.value as ContentType }))}
-          >
-            {Object.entries(ContentType).map(([name, uid]) => (
-              <option key={uid} value={uid}>{name} ({uid})</option>
-            ))}
-          </Select>
-          <Select
-            label="locale"
-            value={form.locale}
-            onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
-          >
-            {Object.entries(Locale).map(([name, val]) => (
-              <option key={val} value={val}>{name} ({val})</option>
-            ))}
-          </Select>
-        </div>
-        <div className="mt-4">
-          <Button variant="danger" onClick={run} loading={loading}>
-            Delete All Entries
-          </Button>
-        </div>
-      </Card>
 
       {result && (
         <Card>

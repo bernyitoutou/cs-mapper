@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LogsPanel from "../../components/LogsPanel";
+import { OperationOverview } from "../../components/OperationOverview";
+import { OperationRunSection } from "../../components/OperationRunSection";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
@@ -105,105 +107,99 @@ export default function MassImport() {
       <button onClick={() => navigate("/")} className="text-sm text-dec-blue hover:underline cursor-pointer">
         ← Back
       </button>
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">📥</span>
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Mass Import</h1>
-          <p className="text-sm text-gray-500">Bulk-create entries from a JSON file upload.</p>
-        </div>
-      </div>
+      <OperationOverview operationId="mass-import" />
+
+      <OperationRunSection operationId="mass-import">
+        <Card>
+          <h2 className="text-sm font-semibold text-gray-700 mb-3">1. Upload JSON file</h2>
+          <div className="flex items-center gap-3">
+            <label className="px-4 py-2 text-sm font-medium border border-dec-blue text-dec-blue rounded cursor-pointer hover:bg-dec-blue-light transition-colors">
+              Choose file
+              <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleFile} />
+            </label>
+            {fileName && <span className="text-sm text-gray-600 font-mono">{fileName}</span>}
+            {items && <span className="text-sm text-green-700 font-medium">{items.length} items loaded</span>}
+            {items && (
+              <button onClick={reset} className="ml-auto text-xs text-red-400 hover:text-red-600 cursor-pointer">
+                Reset
+              </button>
+            )}
+          </div>
+          {parseError && <p className="mt-2 text-sm text-red-600">{parseError}</p>}
+          {previewItems.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-medium text-gray-500 uppercase mb-2">Preview (first {previewItems.length} items)</p>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {previewItems.map((item, i) => (
+                  <div key={i} className="bg-surface rounded p-2">
+                    <p className="text-xs font-semibold text-gray-600 mb-1">Item {i + 1}</p>
+                    <div className="grid grid-cols-2 gap-x-3 text-xs text-gray-500">
+                      {Object.entries(item).slice(0, 6).map(([k, v]) => (
+                        <div key={k} className="flex gap-1 truncate">
+                          <span className="font-mono font-medium text-gray-700 shrink-0">{k}:</span>
+                          <span className="truncate">{JSON.stringify(v)}</span>
+                        </div>
+                      ))}
+                      {Object.keys(item).length > 6 && (
+                        <span className="text-gray-400">+{Object.keys(item).length - 6} more</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </Card>
+
+        <Card>
+          <h2 className="text-sm font-semibold text-gray-700 mb-3">2. Import options</h2>
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label="content type"
+              value={options.contentTypeUid}
+              onChange={(e) => setOptions((o) => ({ ...o, contentTypeUid: e.target.value as ContentType }))}
+            >
+              {Object.entries(ContentType).map(([name, uid]) => (
+                <option key={uid} value={uid}>{name} ({uid})</option>
+              ))}
+            </Select>
+            <Select
+              label="locale"
+              value={options.locale}
+              onChange={(e) => setOptions((o) => ({ ...o, locale: e.target.value as Locale }))}
+            >
+              {Object.entries(Locale).map(([name, val]) => (
+                <option key={val} value={val}>{name} ({val})</option>
+              ))}
+            </Select>
+            <label className="flex items-center gap-2 col-span-2">
+              <input
+                type="checkbox"
+                checked={options.createMasterFirst}
+                onChange={(e) => setOptions((o) => ({ ...o, createMasterFirst: e.target.checked }))}
+                className="w-4 h-4 accent-dec-blue"
+              />
+              <span className="text-sm text-gray-700">Create master first</span>
+            </label>
+            <label className="flex items-center gap-2 col-span-2">
+              <input
+                type="checkbox"
+                checked={options.publishAfterCreate}
+                onChange={(e) => setOptions((o) => ({ ...o, publishAfterCreate: e.target.checked }))}
+                className="w-4 h-4 accent-dec-blue"
+              />
+              <span className="text-sm text-gray-700">Publish after create</span>
+            </label>
+          </div>
+          <div className="mt-4">
+            <Button onClick={run} disabled={!items} loading={loading}>
+              {loading ? `Importing ${items?.length ?? 0} items…` : `Import ${items?.length ?? 0} items`}
+            </Button>
+          </div>
+        </Card>
+      </OperationRunSection>
 
       <ParamGuide params={operations.find((o) => o.id === "mass-import")!.paramsMeta} />
-
-      {/* Upload */}
-      <Card>
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">1. Upload JSON file</h2>
-        <div className="flex items-center gap-3">
-          <label className="px-4 py-2 text-sm font-medium border border-dec-blue text-dec-blue rounded cursor-pointer hover:bg-dec-blue-light transition-colors">
-            Choose file
-            <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleFile} />
-          </label>
-          {fileName && <span className="text-sm text-gray-600 font-mono">{fileName}</span>}
-          {items && <span className="text-sm text-green-700 font-medium">{items.length} items loaded</span>}
-          {items && (
-            <button onClick={reset} className="ml-auto text-xs text-red-400 hover:text-red-600 cursor-pointer">
-              Reset
-            </button>
-          )}
-        </div>
-        {parseError && <p className="mt-2 text-sm text-red-600">{parseError}</p>}
-        {previewItems.length > 0 && (
-          <div className="mt-4">
-            <p className="text-xs font-medium text-gray-500 uppercase mb-2">Preview (first {previewItems.length} items)</p>
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {previewItems.map((item, i) => (
-                <div key={i} className="bg-surface rounded p-2">
-                  <p className="text-xs font-semibold text-gray-600 mb-1">Item {i + 1}</p>
-                  <div className="grid grid-cols-2 gap-x-3 text-xs text-gray-500">
-                    {Object.entries(item).slice(0, 6).map(([k, v]) => (
-                      <div key={k} className="flex gap-1 truncate">
-                        <span className="font-mono font-medium text-gray-700 shrink-0">{k}:</span>
-                        <span className="truncate">{JSON.stringify(v)}</span>
-                      </div>
-                    ))}
-                    {Object.keys(item).length > 6 && (
-                      <span className="text-gray-400">+{Object.keys(item).length - 6} more</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </Card>
-
-      {/* Options */}
-      <Card>
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">2. Import options</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <Select
-            label="content type"
-            value={options.contentTypeUid}
-            onChange={(e) => setOptions((o) => ({ ...o, contentTypeUid: e.target.value as ContentType }))}
-          >
-            {Object.entries(ContentType).map(([name, uid]) => (
-              <option key={uid} value={uid}>{name} ({uid})</option>
-            ))}
-          </Select>
-          <Select
-            label="locale"
-            value={options.locale}
-            onChange={(e) => setOptions((o) => ({ ...o, locale: e.target.value as Locale }))}
-          >
-            {Object.entries(Locale).map(([name, val]) => (
-              <option key={val} value={val}>{name} ({val})</option>
-            ))}
-          </Select>
-          <label className="flex items-center gap-2 col-span-2">
-            <input
-              type="checkbox"
-              checked={options.createMasterFirst}
-              onChange={(e) => setOptions((o) => ({ ...o, createMasterFirst: e.target.checked }))}
-              className="w-4 h-4 accent-dec-blue"
-            />
-            <span className="text-sm text-gray-700">Create master first</span>
-          </label>
-          <label className="flex items-center gap-2 col-span-2">
-            <input
-              type="checkbox"
-              checked={options.publishAfterCreate}
-              onChange={(e) => setOptions((o) => ({ ...o, publishAfterCreate: e.target.checked }))}
-              className="w-4 h-4 accent-dec-blue"
-            />
-            <span className="text-sm text-gray-700">Publish after create</span>
-          </label>
-        </div>
-        <div className="mt-4">
-          <Button onClick={run} disabled={!items} loading={loading}>
-            {loading ? `Importing ${items?.length ?? 0} items…` : `Import ${items?.length ?? 0} items`}
-          </Button>
-        </div>
-      </Card>
 
       {/* Result */}
       {result && (

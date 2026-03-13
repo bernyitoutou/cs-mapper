@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LogsPanel from "../../components/LogsPanel";
+import { OperationOverview } from "../../components/OperationOverview";
+import { OperationRunSection } from "../../components/OperationRunSection";
 import { ParamGuide } from "../../components/ParamGuide";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
@@ -64,34 +66,28 @@ export default function CleanEntries() {
       >
         ← Back
       </button>
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">🧹</span>
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Clean Entries</h1>
-          <p className="text-sm text-gray-500">
-            Strip ContentStack system fields from a JSON payload inside the dashboard.
-          </p>
-        </div>
-      </div>
+      <OperationOverview operationId="clean-entries" />
+
+      <OperationRunSection operationId="clean-entries">
+        <Card>
+          <div className="space-y-2">
+            <span className="block text-xs font-medium text-gray-500 uppercase tracking-wide">
+              entries json
+            </span>
+            <textarea
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+              className="w-full min-h-72 border border-border rounded px-3 py-2 text-sm font-mono focus:outline-none focus:border-dec-blue"
+            />
+            {error && <p className="text-xs text-red-500">{error}</p>}
+          </div>
+          <div className="mt-4">
+            <Button onClick={run} loading={loading}>Clean Entries</Button>
+          </div>
+        </Card>
+      </OperationRunSection>
 
       <ParamGuide params={operation?.paramsMeta ?? []} />
-
-      <Card>
-        <div className="space-y-2">
-          <span className="block text-xs font-medium text-gray-500 uppercase tracking-wide">
-            entries json
-          </span>
-          <textarea
-            value={value}
-            onChange={(event) => setValue(event.target.value)}
-            className="w-full min-h-72 border border-border rounded px-3 py-2 text-sm font-mono focus:outline-none focus:border-dec-blue"
-          />
-          {error && <p className="text-xs text-red-500">{error}</p>}
-        </div>
-        <div className="mt-4">
-          <Button onClick={run} loading={loading}>Clean Entries</Button>
-        </div>
-      </Card>
 
       {result && (
         <Card>

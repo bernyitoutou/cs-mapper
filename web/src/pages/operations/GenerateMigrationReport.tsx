@@ -6,12 +6,15 @@ import type { Id } from "@convex/_generated/dataModel";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import LogsPanel from "../../components/LogsPanel";
+import { OperationDependencies } from "../../components/OperationDependencies";
+import { OperationOverview } from "../../components/OperationOverview";
+import { OperationRunSection } from "../../components/OperationRunSection";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
 import { Locale } from "@convex/lib/locales";
 import { ParamGuide } from "../../components/ParamGuide";
-import { operations } from "../../lib/operations";
+import { getOperationMeta } from "../../lib/operations";
 
 export default function GenerateMigrationReport() {
   const navigate = useNavigate();
@@ -21,6 +24,7 @@ export default function GenerateMigrationReport() {
   const reports = useQuery(api.services.reports.listReports);
   const deleteReport = useMutation(api.services.reports.deleteReport);
   const saveReport = useMutation(api.services.reports.saveReport);
+  const operation = getOperationMeta("generate-migration-report");
 
   const [locale, setLocale] = useState<Locale>(Locale.EnGb);
   const [result, setResult] = useState<{ categories: unknown[]; quickReport: string; detailedReport: string } | null>(null);
@@ -105,37 +109,35 @@ export default function GenerateMigrationReport() {
       <button onClick={() => navigate("/")} className="text-sm text-dec-blue hover:underline cursor-pointer">
         ← Back
       </button>
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">📊</span>
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Migration Report</h1>
-          <p className="text-sm text-gray-500">Scrape Sphere pages and generate a markdown migration status report.</p>
-        </div>
-      </div>
+      <OperationOverview operationId="generate-migration-report" />
 
-      <ParamGuide params={operations.find((o) => o.id === "generate-migration-report")!.paramsMeta} />
+      <OperationRunSection operationId="generate-migration-report">
+        <Card>
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label="locale"
+              value={locale}
+              onChange={(e) => setLocale(e.target.value as Locale)}
+            >
+              {Object.entries(Locale).map(([name, val]) => (
+                <option key={val} value={val}>{name} ({val})</option>
+              ))}
+            </Select>
+          </div>
+          <div className="mt-4 flex items-center gap-4">
+            <Button onClick={run} loading={loading}>Generate Report</Button>
+            {progress && (
+              <p className={["text-xs", progress.startsWith("Error") ? "text-red-500" : "text-dec-blue"].join(" ")}>
+                {progress}
+              </p>
+            )}
+          </div>
+        </Card>
+      </OperationRunSection>
 
-      <Card>
-        <div className="grid grid-cols-2 gap-3">
-          <Select
-            label="locale"
-            value={locale}
-            onChange={(e) => setLocale(e.target.value as Locale)}
-          >
-            {Object.entries(Locale).map(([name, val]) => (
-              <option key={val} value={val}>{name} ({val})</option>
-            ))}
-          </Select>
-        </div>
-        <div className="mt-4 flex items-center gap-4">
-          <Button onClick={run} loading={loading}>Generate Report</Button>
-          {progress && (
-            <p className={["text-xs", progress.startsWith("Error") ? "text-red-500" : "text-dec-blue"].join(" ")}>
-              {progress}
-            </p>
-          )}
-        </div>
-      </Card>
+      <OperationDependencies operationId="generate-migration-report" locale={locale} />
+
+      <ParamGuide params={operation?.paramsMeta ?? []} />
 
       {result && (
         <>

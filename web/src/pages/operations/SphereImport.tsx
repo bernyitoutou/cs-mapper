@@ -3,19 +3,23 @@ import { useNavigate } from "react-router-dom";
 import { useAction, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import LogsPanel from "../../components/LogsPanel";
+import { OperationOverview } from "../../components/OperationOverview";
+import { OperationRunSection } from "../../components/OperationRunSection";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
+import { OperationDependencies } from "../../components/OperationDependencies";
 import { ContentType } from "@convex/lib/contentstack/types";
 import { Locale } from "@convex/lib/locales";
 import { SphereContentTypes } from "@convex/lib/sphere/types";
 import { ParamGuide } from "../../components/ParamGuide";
-import { operations } from "../../lib/operations";
+import { getOperationMeta } from "../../lib/operations";
 
 export default function SphereImport() {
   const navigate = useNavigate();
   const sphereImport = useAction(api.operations.sphereImport.sphereImport);
   const writelog = useMutation(api.services.logs.writelog);
+  const operation = getOperationMeta("sphere-import");
 
   const [form, setForm] = useState({
     sphereContentTypeId: SphereContentTypes.HowToUse as string,
@@ -53,68 +57,65 @@ export default function SphereImport() {
       <button onClick={() => navigate("/")} className="text-sm text-dec-blue hover:underline cursor-pointer">
         ← Back
       </button>
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">🔄</span>
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Sphere Import</h1>
-          <p className="text-sm text-gray-500">Import content from Sphere into ContentStack (create, update, publish).</p>
-        </div>
-      </div>
+      <OperationOverview operationId="sphere-import" />
 
-      <ParamGuide params={operations.find((o) => o.id === "sphere-import")!.paramsMeta} />
-
-      {/* Form */}
-      <Card>
-        <div className="grid grid-cols-2 gap-3">
-          <Select
-            label="Sphere type"
-            value={form.sphereContentTypeId}
-            onChange={(e) => setForm((f) => ({ ...f, sphereContentTypeId: e.target.value }))}
-          >
-            {Object.entries(SphereContentTypes).map(([name, id]) => (
-              <option key={id} value={id}>{name}</option>
-            ))}
-          </Select>
-          <Select
-            label="CS type"
-            value={form.csContentTypeUid}
-            onChange={(e) => setForm((f) => ({ ...f, csContentTypeUid: e.target.value as ContentType }))}
-          >
-            {Object.entries(ContentType).map(([name, uid]) => (
-              <option key={uid} value={uid}>{name} ({uid})</option>
-            ))}
-          </Select>
-          <Select
-            label="locale"
-            value={form.locale}
-            onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
-          >
-            {Object.entries(Locale).map(([name, val]) => (
-              <option key={val} value={val}>{name} ({val})</option>
-            ))}
-          </Select>
-          <div className="flex items-end pb-1">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.dryRun}
-                onChange={(e) => setForm((f) => ({ ...f, dryRun: e.target.checked }))}
-                className="w-4 h-4 accent-dec-blue"
-              />
-              <span className="text-sm text-gray-700">Dry run (no writes)</span>
-            </label>
+      <OperationRunSection operationId="sphere-import">
+        <Card>
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label="Sphere type"
+              value={form.sphereContentTypeId}
+              onChange={(e) => setForm((f) => ({ ...f, sphereContentTypeId: e.target.value }))}
+            >
+              {Object.entries(SphereContentTypes).map(([name, id]) => (
+                <option key={id} value={id}>{name}</option>
+              ))}
+            </Select>
+            <Select
+              label="CS type"
+              value={form.csContentTypeUid}
+              onChange={(e) => setForm((f) => ({ ...f, csContentTypeUid: e.target.value as ContentType }))}
+            >
+              {Object.entries(ContentType).map(([name, uid]) => (
+                <option key={uid} value={uid}>{name} ({uid})</option>
+              ))}
+            </Select>
+            <Select
+              label="locale"
+              value={form.locale}
+              onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value as Locale }))}
+            >
+              {Object.entries(Locale).map(([name, val]) => (
+                <option key={val} value={val}>{name} ({val})</option>
+              ))}
+            </Select>
+            <div className="flex items-end pb-1">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.dryRun}
+                  onChange={(e) => setForm((f) => ({ ...f, dryRun: e.target.checked }))}
+                  className="w-4 h-4 accent-dec-blue"
+                />
+                <span className="text-sm text-gray-700">Dry run (no writes)</span>
+              </label>
+            </div>
           </div>
-        </div>
-        <div className="mt-4">
-          <Button
-            onClick={run}
-            loading={loading}
-            variant={form.dryRun ? "secondary" : "primary"}
-          >
-            {form.dryRun ? "Dry Run Import" : "Run Import"}
-          </Button>
-        </div>
-      </Card>
+          <div className="mt-4">
+            <Button
+              onClick={run}
+              loading={loading}
+              variant={form.dryRun ? "secondary" : "primary"}
+            >
+              {form.dryRun ? "Dry Run Import" : "Run Import"}
+            </Button>
+          </div>
+        </Card>
+      </OperationRunSection>
+
+      <OperationDependencies operationId="sphere-import" locale={form.locale} />
+
+      <ParamGuide params={operation?.paramsMeta ?? []} />
 
       {/* Result */}
       {result && (
