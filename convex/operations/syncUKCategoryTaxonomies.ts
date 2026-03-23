@@ -12,15 +12,6 @@ import { createSportGroupLookup } from "../lib/fedid/sportGroupLookup.js";
 import { getSphereContentByUUID, getSphereContentFromHTML } from "../lib/sphere/retrieve.js";
 import { mapSphereToBlogPost } from "../lib/sphere/blogPostMapper.js";
 import { localeValidator } from "../lib/locales";
-import { Taxonomy } from "../lib/contentstack/types";
-
-type UKSportsCategory = {
-  name: string;
-  url: string;
-  sphereId: string;
-  taxonomy: Taxonomy;
-  articleIds?: string[];
-};
 
 /**
  * For every article sphere ID stored in sportCategories, ensure it exists

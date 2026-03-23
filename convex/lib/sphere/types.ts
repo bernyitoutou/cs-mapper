@@ -28,13 +28,6 @@ export type SphereListResponse = {
   "hydra:member": SphereContent[];
 };
 
-export type SphereContentTypeDefinition = {
-  id: string;
-  name: string;
-  description?: string;
-  [key: string]: unknown;
-};
-
 export type SphereSearchParams = {
   /** Content-type UUID */
   contentTypeId?: string;

@@ -2,7 +2,6 @@ import { sphereGet, getContentHTMLByUUID, SphereError } from "./client.js";
 import { sleep } from "../utils.js";
 import type {
   SphereContent,
-  SphereContentTypeDefinition,
   SphereListResponse,
   SphereSearchParams,
   SphereTeaserImage,
@@ -166,25 +165,6 @@ export async function searchSphereContents(
 }
 
 /**
- * Get Sphere contents by product model code(s).
- *
- * @example
- * const items = await getSphereContentsByModelCode(
- *   ["8581842"],
- *   "875ef604-5ca2-4ed9-96b7-15e6c6e0fd0d",
- *   { locale: "en-GB", status: 1 }
- * );
- */
-export async function getSphereContentsByModelCode(
-  modelCodes: string[],
-  contentTypeId: string,
-  params: Omit<SphereSearchParams, "modelCodes" | "contentTypeId"> = {}
-): Promise<SphereContent[]> {
-  const result = await searchSphereContents({ ...params, modelCodes, contentTypeId });
-  return result["hydra:member"];
-}
-
-/**
  * Fetch ALL Sphere contents matching a filter, paginating automatically.
  *
  * @example
@@ -206,9 +186,4 @@ export async function getAllSphereContents(
   }
 
   return collected;
-}
-
-/** List available content type definitions in Sphere. */
-export async function getSphereContentTypes(): Promise<SphereContentTypeDefinition[]> {
-  return sphereGet<SphereContentTypeDefinition[]>("/content_types");
 }

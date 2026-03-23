@@ -101,55 +101,6 @@ export type GetEntryResponse<
   entry: Entry<T>;
 };
 
-export type GetAssetsResponse = {
-  assets: Asset[];
-  count?: number;
-};
-
-export type GetContentTypesResponse = {
-  content_types: ContentTypeDefinition[];
-  count?: number;
-};
-
-export type GetContentTypeResponse = {
-  content_type: ContentTypeDefinition;
-};
-
-export type ContentTypeDefinition = {
-  uid: string;
-  title: string;
-  description: string;
-  schema: ContentTypeFieldDefinition[];
-  options: Record<string, unknown>;
-  created_at: string;
-  updated_at: string;
-};
-
-export type ContentTypeFieldDefinition = {
-  uid: string;
-  display_name: string;
-  data_type: string;
-  mandatory: boolean;
-  unique: boolean;
-  multiple: boolean;
-  schema?: ContentTypeFieldDefinition[];
-  [key: string]: unknown;
-};
-
-export type Asset = {
-  uid: string;
-  title: string;
-  filename: string;
-  content_type: string;
-  file_size: string;
-  url: string;
-  created_at: string;
-  updated_at: string;
-  tags: string[];
-  publish_details?: PublishDetails[];
-  [key: string]: unknown;
-};
-
 // ---------------------------------------------------------------------------
 // Retrieve params
 // ---------------------------------------------------------------------------
@@ -169,12 +120,6 @@ export type GetEntriesParams = {
   pagination?: Pagination;
 };
 
-export type GetAssetsParams = {
-  query?: string;
-  folder?: string;
-  pagination?: Pagination;
-};
-
 // ---------------------------------------------------------------------------
 // Update / Publish params
 // ---------------------------------------------------------------------------
@@ -188,25 +133,6 @@ export type PublishEntryParams = {
   locales: Locale[];
   /** ISO datetime for scheduled publishing */
   scheduledAt?: string;
-};
-
-export type BulkPublishItem = {
-  content_type: ContentType;
-  uid: string;
-  locale: Locale;
-};
-
-export type BulkPublishParams = {
-  entries: BulkPublishItem[];
-  environments: Environment[];
-  locales: Locale[];
-  action: "publish" | "unpublish";
-};
-
-export type BulkUpdateParams = {
-  content_type: ContentType;
-  entries: Array<{ uid: string; locale: Locale }>;
-  update: Record<string, unknown>;
 };
 
 export type ContentstackApiError = {

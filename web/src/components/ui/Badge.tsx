@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-type Variant = "default" | "blue" | "green" | "red" | "orange" | "purple" | "teal" | "gray" | "yellow";
+type Variant = "default" | "blue" | "green" | "red" | "orange" | "purple" | "teal" | "gray";
 
 const variants: Record<Variant, string> = {
   default: "bg-gray-100 text-gray-600",
@@ -11,7 +11,6 @@ const variants: Record<Variant, string> = {
   purple: "bg-purple-100 text-purple-700",
   teal: "bg-teal-100 text-teal-700",
   gray: "bg-gray-100 text-gray-500",
-  yellow: "bg-yellow-100 text-yellow-700",
 };
 
 type BadgeProps = {

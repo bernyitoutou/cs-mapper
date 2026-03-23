@@ -35,12 +35,9 @@ import type * as operations_massImport from "../operations/massImport.js";
 import type * as operations_seedSportCategories from "../operations/seedSportCategories.js";
 import type * as operations_sphereImport from "../operations/sphereImport.js";
 import type * as operations_syncUKCategoryTaxonomies from "../operations/syncUKCategoryTaxonomies.js";
-import type * as services_contentstack from "../services/contentstack.js";
-import type * as services_fedid from "../services/fedid.js";
 import type * as services_logs from "../services/logs.js";
 import type * as services_reports from "../services/reports.js";
 import type * as services_settings from "../services/settings.js";
-import type * as services_sphere from "../services/sphere.js";
 import type * as services_sportCategories from "../services/sportCategories.js";
 import type * as services_sportGroupMappings from "../services/sportGroupMappings.js";
 
@@ -78,12 +75,9 @@ declare const fullApi: ApiFromModules<{
   "operations/seedSportCategories": typeof operations_seedSportCategories;
   "operations/sphereImport": typeof operations_sphereImport;
   "operations/syncUKCategoryTaxonomies": typeof operations_syncUKCategoryTaxonomies;
-  "services/contentstack": typeof services_contentstack;
-  "services/fedid": typeof services_fedid;
   "services/logs": typeof services_logs;
   "services/reports": typeof services_reports;
   "services/settings": typeof services_settings;
-  "services/sphere": typeof services_sphere;
   "services/sportCategories": typeof services_sportCategories;
   "services/sportGroupMappings": typeof services_sportGroupMappings;
 }>;

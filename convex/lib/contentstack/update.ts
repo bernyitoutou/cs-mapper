@@ -2,8 +2,6 @@ import { config } from "../config.js";
 import { Locale } from "../locales.js";
 import { managementDelete, managementPost, managementPut } from "./client.js";
 import type {
-  BulkPublishParams,
-  BulkUpdateParams,
   Entry,
   GetEntryResponse,
   PublishEntryParams,
@@ -147,102 +145,4 @@ export async function unpublishEntry(
       },
     }
   );
-}
-
-// ---------------------------------------------------------------------------
-// Bulk operations
-// ---------------------------------------------------------------------------
-
-/**
- * Bulk publish or unpublish a list of entries.
- * CS processes this asynchronously — returns a job ID to poll.
- *
- * @example
- * const { job_id } = await bulkPublish({
- *   entries: [{ content_type: "homepage", uid: "blt...", locale: "en-GB" }],
- *   environments: ["staging"],
- *   locales: ["en-GB"],
- *   action: "publish",
- * });
- */
-export async function bulkPublish(
-  params: BulkPublishParams
-): Promise<{ job_id: string }> {
-  return managementPost<{ job_id: string }>("/bulk/publish", {
-    entries: params.entries,
-    environments: params.environments,
-    locales: params.locales,
-    action: params.action,
-  });
-}
-
-/**
- * Bulk update a specific set of fields across many entries.
- *
- * @example
- * await bulkUpdate({
- *   content_type: "homepage",
- *   entries: [{ uid: "blt1", locale: "en-GB" }],
- *   update: { tags: ["script-updated"] },
- * });
- */
-export async function bulkUpdate(
-  params: BulkUpdateParams
-): Promise<{ job_id: string }> {
-  return managementPost<{ job_id: string }>("/bulk/update", {
-    content_type: { uid: params.content_type },
-    entries: params.entries,
-    update: params.update,
-  });
-}
-
-/** Poll the status of an async bulk job. */
-export async function getBulkJobStatus(jobId: string): Promise<{
-  status: "in_progress" | "completed" | "failed";
-  message?: string;
-  errors?: unknown[];
-}> {
-  return managementPost(`/bulk/jobs/${jobId}`, {});
-}
-
-// ---------------------------------------------------------------------------
-// Convenience helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Apply a field patch to many entries one by one.
- * Fetches nothing — you must pass the full current entry objects so that
- * ContentStack does not wipe unset fields.
- *
- * For large sets prefer `bulkUpdate()` which is a single API call.
- *
- * @returns Array of `{ uid, success, error? }` per entry.
- */
-export async function patchEntries(
-  contentTypeUid: string,
-  entries: Array<Entry>,
-  patch: Record<string, unknown>,
-  locale?: string
-): Promise<Array<{ uid: string; success: boolean; error?: string }>> {
-  const results: Array<{ uid: string; success: boolean; error?: string }> = [];
-
-  for (const entry of entries) {
-    try {
-      await updateEntry(
-        contentTypeUid,
-        entry.uid,
-        { entry: { ...entry, ...patch } },
-        locale
-      );
-      results.push({ uid: entry.uid, success: true });
-    } catch (err) {
-      results.push({
-        uid: entry.uid,
-        success: false,
-        error: err instanceof Error ? err.message : String(err),
-      });
-    }
-  }
-
-  return results;
 }
