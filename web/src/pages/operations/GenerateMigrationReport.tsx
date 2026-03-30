@@ -23,7 +23,6 @@ export default function GenerateMigrationReport() {
   const writelog = useMutation(api.services.logs.writelog);
   const reports = useQuery(api.services.reports.listReports);
   const deleteReport = useMutation(api.services.reports.deleteReport);
-  const saveReport = useMutation(api.services.reports.saveReport);
   const operation = getOperationMeta("generate-migration-report");
 
   const [locale, setLocale] = useState<Locale>(Locale.EnGb);
@@ -31,9 +30,6 @@ export default function GenerateMigrationReport() {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("");
   const [selectedId, setSelectedId] = useState<Id<"reports"> | null>(null);
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadLocale, setUploadLocale] = useState<Locale>(Locale.EnGb);
-  const [uploadLoading, setUploadLoading] = useState(false);
 
   const selectedReport = useQuery(api.services.reports.getReport, selectedId ? { id: selectedId } : "skip");
 
@@ -62,21 +58,6 @@ export default function GenerateMigrationReport() {
       await writelog({ type: "generate_report", status: "error", error: String(err) });
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleUpload() {
-    if (!uploadFile) return;
-    setUploadLoading(true);
-    try {
-      const content = await uploadFile.text();
-      const name = uploadFile.name.replace(/\.md$/, "");
-      await saveReport({ name, content, locale: uploadLocale, generatedAt: Date.now() });
-      setUploadFile(null);
-    } catch (err) {
-      alert(`Upload failed: ${String(err)}`);
-    } finally {
-      setUploadLoading(false);
     }
   }
 
@@ -157,44 +138,7 @@ export default function GenerateMigrationReport() {
       )}
 
       <div className="grid grid-cols-3 gap-5">
-        <div className="space-y-4">
-          <Card>
-            <h2 className="text-sm font-semibold text-gray-700 mb-3">Upload .md Report</h2>
-            <label className="block mb-2">
-              <span className="px-3 py-1.5 text-sm border border-border rounded cursor-pointer hover:bg-surface inline-block">
-                Choose .md file
-              </span>
-              <input
-                type="file"
-                accept=".md"
-                className="hidden"
-                onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
-              />
-            </label>
-            {uploadFile && <p className="text-xs text-gray-500 mb-2 font-mono">{uploadFile.name}</p>}
-            <label className="space-y-1 block mb-3">
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Locale</span>
-              <select
-                className="w-full border border-border rounded px-3 py-2 text-sm"
-                value={uploadLocale}
-                onChange={(e) => setUploadLocale(e.target.value as Locale)}
-              >
-                {Object.entries(Locale).map(([name, val]) => (
-                  <option key={val} value={val}>{name} ({val})</option>
-                ))}
-              </select>
-            </label>
-            <Button
-              onClick={handleUpload}
-              disabled={!uploadFile || uploadLoading}
-              loading={uploadLoading}
-              variant="secondary"
-              className="w-full"
-            >
-              Upload
-            </Button>
-          </Card>
-
+        <div>
           <div className="bg-white rounded-lg border border-border overflow-hidden">
             <div className="px-4 py-2.5 border-b border-border bg-gray-50">
               <span className="text-sm font-semibold text-gray-700">Saved Reports</span>
@@ -247,11 +191,7 @@ export default function GenerateMigrationReport() {
                 dangerouslySetInnerHTML={{ __html: renderedHtml ?? "" }}
               />
             </div>
-          ) : (
-            <div className="bg-white rounded-lg border border-border flex items-center justify-center h-64">
-              <p className="text-sm text-gray-400">Select a saved report to view it</p>
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
 

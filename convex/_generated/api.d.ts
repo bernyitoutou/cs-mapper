@@ -24,9 +24,9 @@ import type * as lib_sphere_client from "../lib/sphere/client.js";
 import type * as lib_sphere_retrieve from "../lib/sphere/retrieve.js";
 import type * as lib_sphere_types from "../lib/sphere/types.js";
 import type * as lib_utils from "../lib/utils.js";
-import type * as operations_checkSyncStatus from "../operations/checkSyncStatus.js";
 import type * as operations_cleanEntries from "../operations/cleanEntries.js";
 import type * as operations_deleteEntries from "../operations/deleteEntries.js";
+import type * as operations_dispatchScheduledJob from "../operations/dispatchScheduledJob.js";
 import type * as operations_enrichSportCategories from "../operations/enrichSportCategories.js";
 import type * as operations_generateMigrationReport from "../operations/generateMigrationReport.js";
 import type * as operations_generateSportGroupMapping from "../operations/generateSportGroupMapping.js";
@@ -37,6 +37,7 @@ import type * as operations_sphereImport from "../operations/sphereImport.js";
 import type * as operations_syncUKCategoryTaxonomies from "../operations/syncUKCategoryTaxonomies.js";
 import type * as services_logs from "../services/logs.js";
 import type * as services_reports from "../services/reports.js";
+import type * as services_scheduledJobs from "../services/scheduledJobs.js";
 import type * as services_settings from "../services/settings.js";
 import type * as services_sportCategories from "../services/sportCategories.js";
 import type * as services_sportGroupMappings from "../services/sportGroupMappings.js";
@@ -64,9 +65,9 @@ declare const fullApi: ApiFromModules<{
   "lib/sphere/retrieve": typeof lib_sphere_retrieve;
   "lib/sphere/types": typeof lib_sphere_types;
   "lib/utils": typeof lib_utils;
-  "operations/checkSyncStatus": typeof operations_checkSyncStatus;
   "operations/cleanEntries": typeof operations_cleanEntries;
   "operations/deleteEntries": typeof operations_deleteEntries;
+  "operations/dispatchScheduledJob": typeof operations_dispatchScheduledJob;
   "operations/enrichSportCategories": typeof operations_enrichSportCategories;
   "operations/generateMigrationReport": typeof operations_generateMigrationReport;
   "operations/generateSportGroupMapping": typeof operations_generateSportGroupMapping;
@@ -77,6 +78,7 @@ declare const fullApi: ApiFromModules<{
   "operations/syncUKCategoryTaxonomies": typeof operations_syncUKCategoryTaxonomies;
   "services/logs": typeof services_logs;
   "services/reports": typeof services_reports;
+  "services/scheduledJobs": typeof services_scheduledJobs;
   "services/settings": typeof services_settings;
   "services/sportCategories": typeof services_sportCategories;
   "services/sportGroupMappings": typeof services_sportGroupMappings;
@@ -108,4 +110,56 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  crons: {
+    public: {
+      del: FunctionReference<
+        "mutation",
+        "internal",
+        { identifier: { id: string } | { name: string } },
+        null
+      >;
+      get: FunctionReference<
+        "query",
+        "internal",
+        { identifier: { id: string } | { name: string } },
+        {
+          args: Record<string, any>;
+          functionHandle: string;
+          id: string;
+          name?: string;
+          schedule:
+            | { kind: "interval"; ms: number }
+            | { cronspec: string; kind: "cron"; tz?: string };
+        } | null
+      >;
+      list: FunctionReference<
+        "query",
+        "internal",
+        {},
+        Array<{
+          args: Record<string, any>;
+          functionHandle: string;
+          id: string;
+          name?: string;
+          schedule:
+            | { kind: "interval"; ms: number }
+            | { cronspec: string; kind: "cron"; tz?: string };
+        }>
+      >;
+      register: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          args: Record<string, any>;
+          functionHandle: string;
+          name?: string;
+          schedule:
+            | { kind: "interval"; ms: number }
+            | { cronspec: string; kind: "cron"; tz?: string };
+        },
+        string
+      >;
+    };
+  };
+};

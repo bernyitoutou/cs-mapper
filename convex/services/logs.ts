@@ -31,6 +31,19 @@ export const getLogs = query({
   },
 });
 
+/** Return the most recent log entry per scheduled job name. */
+export const getRecentScheduledLogs = query({
+  args: {},
+  handler: async (ctx) => {
+    const logs = await ctx.db
+      .query("operationLogs")
+      .withIndex("by_timestamp")
+      .order("desc")
+      .take(500);
+    return logs.filter((l) => l.type.startsWith("scheduled:"));
+  },
+});
+
 /** Delete all log entries. */
 export const clearLogs = mutation({
   args: {},

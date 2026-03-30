@@ -19,6 +19,7 @@ export type OperationMeta = {
   icon: string;
   logType: string;
   danger?: boolean;
+  schedulable?: boolean;
   params: string[];
   paramsMeta: ParamMeta[];
   dependencies?: OperationDependency[];
@@ -26,8 +27,42 @@ export type OperationMeta = {
 
 export const operations: OperationMeta[] = [
     {
+    id: "sync-uk-category-taxonomies",
+    name: "Sync Sphere Articles with ContentStack Blog Posts",
+    description: "Ensures every article referenced by Convex sportCategories exists in ContentStack blog_post with the required UK taxonomy terms, creating missing entries from Sphere when necessary.",
+    howItWorks: [
+      "Builds an article-to-required-taxonomies index from Convex sportCategories, merging terms when the same article appears in multiple categories.",
+      "Checks existing ContentStack blog_post entries by sphere_id and adds any missing taxonomy terms without removing existing ones.",
+      "When an article is missing entirely, fetches it from the Sphere API or renderer fallback, maps it to blog_post, merges UK-category and dd_sports taxonomies, then creates and publishes it.",
+    ],
+    dataSources: [
+      "Convex sportCategories for articleIds and required UK taxonomy terms.",
+      "Convex sportGroupMappings to derive dd_sports taxonomies during article recreation.",
+      "Sphere content API with HTML fallback, plus ContentStack managed blog_post entries.",
+    ],
+    route: "/operations/sync-uk-category-taxonomies",
+    icon: "🏷️",
+    logType: "syncUKCategoryTaxonomies",
+    schedulable: true,
+    params: ["locale", "dry run"],
+    paramsMeta: [
+      { name: "locale", desc: "Locale used when creating or updating ContentStack entries.", values: ["en-GB", "en-US", "fr-FR", "de-DE", "es-ES", "it-IT", "ja-JP", "zh-CN"] },
+      { name: "dry run", desc: "When on, only audits which articles are missing or need taxonomy updates — no writes to ContentStack.", values: ["on → audit only", "off → live write"] },
+    ],
+    dependencies: [
+      {
+        id: "seed-sport-categories",
+        reason: "The sync reads article IDs and taxonomies from sportCategories in Convex.",
+      },
+      {
+        id: "generate-sport-group-mapping",
+        reason: "The sync also needs sportGroupMappings to derive dd_sports taxonomies when recreating missing entries.",
+      },
+    ],
+  },
+    {
     id: "generate-migration-report",
-    name: "Migration Report",
+    name: "Generated Blog Post Migration Report",
     description: "Reads sport categories from Convex, scrapes each Sphere category page, compares HTC vs non-HTC article links against ContentStack taxonomy counts, and saves quick plus detailed markdown reports in Convex.",
     howItWorks: [
       "Loads the category list from sportCategories in Convex, then fetches each category page through the Sphere renderer.",
@@ -42,6 +77,7 @@ export const operations: OperationMeta[] = [
     route: "/operations/generate-migration-report",
     icon: "📊",
     logType: "generate_report",
+    schedulable: true,
     params: ["locale"],
     paramsMeta: [
       { name: "locale", desc: "Locale used to count matching ContentStack entries. Determines which CS entries are considered migrated.", values: ["en-GB", "en-US", "fr-FR", "de-DE", "es-ES", "it-IT", "ja-JP", "zh-CN"] },
@@ -54,32 +90,8 @@ export const operations: OperationMeta[] = [
     ],
   },
   {
-    id: "check-sync-status",
-    name: "Check Sync Status",
-    description: "Fetches published Sphere items and ContentStack entries for the selected types and locale, compares the chosen match fields, and reports synced keys, Sphere-only keys, and ContentStack-only keys.",
-    howItWorks: [
-      "Fetches all published Sphere items for the selected Sphere content type and locale.",
-      "Fetches the selected ContentStack content type for the same locale, then extracts the chosen match field on each side with dot-notation support.",
-      "Builds set-based diffs to compute the sync rate and list items that exist only in Sphere or only in ContentStack.",
-    ],
-    dataSources: [
-      "Sphere content API results filtered by content type, locale, and published status.",
-      "ContentStack delivery entries for the selected content type and locale.",
-    ],
-    route: "/operations/check-sync-status",
-    icon: "🔍",
-    logType: "sync_check",
-    params: ["Sphere type", "Content Stack type", "match field", "locale"],
-    paramsMeta: [
-      { name: "Sphere type", desc: "Sphere content model to fetch articles from.", values: ["Highlight", "HowToUse", "HowToRepair", "Storybook", "Testing"] },
-      { name: "Content Stack type", desc: "ContentStack content type to compare against.", values: ["blog_post", "blog_sport_category", "blog_content_category"] },
-      { name: "match field", desc: "Field used to cross-reference entries. 'Sphere match field' is on the Sphere side, 'Content Stack match field' is on the ContentStack side — entries match when both fields hold the same value.", values: ["id (Sphere default)", "sphere_id (Content Stack default)"] },
-      { name: "locale", desc: "ContentStack locale scope for the audit.", values: ["en-GB", "en-US", "fr-FR", "de-DE", "es-ES", "it-IT", "ja-JP", "zh-CN"] },
-    ],
-  },
-  {
     id: "sphere-import",
-    name: "Sphere Import",
+    name: "Import Blog Posts entries from Sphere articles",
     description: "Fetches published Sphere content filtered by sport IDs from Convex sportGroupMappings, maps each item into a blog_post payload, then creates, updates, or publishes the matching ContentStack entries.",
     howItWorks: [
       "Loads all known sport IDs and taxonomy mappings from Convex sportGroupMappings, then fetches published Sphere items for the selected content type and locale.",
@@ -94,6 +106,7 @@ export const operations: OperationMeta[] = [
     route: "/operations/sphere-import",
     icon: "🔄",
     logType: "sphere_import",
+    schedulable: true,
     params: ["Sphere type", "Content Stack type", "locale", "dry run"],
     paramsMeta: [
       { name: "Sphere type", desc: "Sphere content model to pull articles from.", values: ["Highlight", "HowToUse", "HowToRepair", "Storybook", "Testing"] },
@@ -159,39 +172,6 @@ export const operations: OperationMeta[] = [
     ],
   },
   {
-    id: "sync-uk-category-taxonomies",
-    name: "UK Category Taxonomies",
-    description: "Ensures every article referenced by Convex sportCategories exists in ContentStack blog_post with the required UK taxonomy terms, creating missing entries from Sphere when necessary.",
-    howItWorks: [
-      "Builds an article-to-required-taxonomies index from Convex sportCategories, merging terms when the same article appears in multiple categories.",
-      "Checks existing ContentStack blog_post entries by sphere_id and adds any missing taxonomy terms without removing existing ones.",
-      "When an article is missing entirely, fetches it from the Sphere API or renderer fallback, maps it to blog_post, merges UK-category and dd_sports taxonomies, then creates and publishes it.",
-    ],
-    dataSources: [
-      "Convex sportCategories for articleIds and required UK taxonomy terms.",
-      "Convex sportGroupMappings to derive dd_sports taxonomies during article recreation.",
-      "Sphere content API with HTML fallback, plus ContentStack managed blog_post entries.",
-    ],
-    route: "/operations/sync-uk-category-taxonomies",
-    icon: "🏷️",
-    logType: "syncUKCategoryTaxonomies",
-    params: ["locale", "dry run"],
-    paramsMeta: [
-      { name: "locale", desc: "Locale used when creating or updating ContentStack entries.", values: ["en-GB", "en-US", "fr-FR", "de-DE", "es-ES", "it-IT", "ja-JP", "zh-CN"] },
-      { name: "dry run", desc: "When on, only audits which articles are missing or need taxonomy updates — no writes to ContentStack.", values: ["on → audit only", "off → live write"] },
-    ],
-    dependencies: [
-      {
-        id: "seed-sport-categories",
-        reason: "The sync reads article IDs and taxonomies from sportCategories in Convex.",
-      },
-      {
-        id: "generate-sport-group-mapping",
-        reason: "The sync also needs sportGroupMappings to derive dd_sports taxonomies when recreating missing entries.",
-      },
-    ],
-  },
-  {
     id: "enrich-sport-categories",
     name: "Enrich Sport Categories",
     description: "Reads seeded sportCategories, scrapes each Sphere category page to extract article links and content list filters, then upserts ddSports and article IDs back into Convex.",
@@ -208,6 +188,7 @@ export const operations: OperationMeta[] = [
     route: "/operations/enrich-sport-categories",
     icon: "🏃",
     logType: "enrich_sport_categories",
+    schedulable: true,
     params: ["locale", "category"],
     paramsMeta: [
       { name: "locale", desc: "Locale used when querying Sphere content lists for the extracted content filters.", values: ["en-GB", "en-US", "fr-FR", "de-DE", "es-ES", "it-IT", "ja-JP", "zh-CN"] },
@@ -236,6 +217,7 @@ export const operations: OperationMeta[] = [
     route: "/operations/seed-sport-categories",
     icon: "🌱",
     logType: "seed_sport_categories",
+    schedulable: true,
     params: ["source"],
     paramsMeta: [
       { name: "source", desc: "Loads the existing legacy uk sports categories JSON into Convex DB. Use once initially, then rerun only to refresh from the legacy seed." },
@@ -258,11 +240,12 @@ export const operations: OperationMeta[] = [
     route: "/operations/generate-sport-group-mapping",
     icon: "🗺️",
     logType: "generate_sport_group_mapping",
+    schedulable: true,
     params: ["locale"],
     paramsMeta: [
       { name: "locale", desc: "Locale used to fetch blog sport category entries and resolve sport groups from the referential API.", values: ["en-GB", "en-US", "fr-FR", "de-DE", "es-ES", "it-IT", "ja-JP", "zh-CN"] },
     ],
-  },
+  },/** 
   {
     id: "clean-entries",
     name: "Clean Entries",
@@ -283,7 +266,7 @@ export const operations: OperationMeta[] = [
     paramsMeta: [
       { name: "entries JSON", desc: "Paste either an array of entries or an object containing an entries array. The operation strips ContentStack system fields only." },
     ],
-  },
+  },*/
   {
     id: "delete-entries",
     name: "Delete Entries",
