@@ -6,7 +6,13 @@
     "ui:dev": "cd web && pnpm dev",
     "convex:dev": "pnpm convex dev",
     "env:staging": "node scripts/set-convex-env.mjs staging",
-    "env:production": "node scripts/set-convex-env.mjs production"
+    "env:production": "node scripts/set-convex-env.mjs production",
+    "backend:up": "docker compose up -d",
+    "backend:down": "docker compose down",
+    "backend:logs": "docker compose logs -f backend",
+    "backend:admin-key": "docker compose exec backend ./generate_admin_key.sh",
+    "deploy": "npx convex deploy",
+    "ui:build": "docker compose build ui"
   },
   "keywords": [],
   "author": "",

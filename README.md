@@ -41,7 +41,7 @@ React + Vite dashboard that connects to the Convex backend in real-time:
 - Lists all available operations with configurable parameters
 - Shows live operation logs and status
 - Displays saved migration reports (rendered Markdown)
-- Allows switching the active ContentStack environment and branch
+- **Schedules** page: create, view, and delete cron-scheduled operations with last-run status
 
 ---
 
@@ -49,11 +49,13 @@ React + Vite dashboard that connects to the Convex backend in real-time:
 
 | Layer | Technology |
 |---|---|
-| Backend | [Convex](https://convex.dev) v1.32 |
+| Backend | [Convex](https://convex.dev) v1.32 (self-hosted via Docker) |
+| Cron scheduling | `@convex-dev/crons` component |
 | Frontend | React 18 + Vite 6 + TypeScript |
 | Routing | React Router DOM v7 |
 | Styling | Tailwind CSS v4 |
 | Package manager | pnpm v10 |
+| Container runtime | Docker (Rancher Desktop or Docker Desktop) |
 
 ---
 
@@ -63,13 +65,17 @@ React + Vite dashboard that connects to the Convex backend in real-time:
 cs-mapper/
 ├── convex/               # Convex backend (schema, operations, services, lib)
 │   ├── schema.ts         # Database schema
+│   ├── convex.config.ts  # Registers @convex-dev/crons component
 │   ├── lib/              # Config, utils, API clients (CS / Sphere / FedID)
 │   ├── operations/       # Triggerable Convex actions
-│   └── services/         # Convex queries & mutations
+│   └── services/         # Convex queries & mutations (including scheduledJobs)
 ├── web/                  # React + Vite frontend
+│   ├── Dockerfile        # Two-stage build: node builder → nginx runner
 │   └── src/
-│       ├── pages/        # One page per operation + Home
+│       ├── pages/        # One page per operation + Home + Schedules
 │       └── components/   # Shared UI components
+├── docker-compose.yml    # backend + dashboard + ui services
+├── .dockerignore
 └── scripts/
     └── set-convex-env.mjs  # Helper to push .env vars to Convex
 ```
@@ -78,48 +84,121 @@ cs-mapper/
 
 ## Setup & deployment
 
-### Prerequisites
+There are two ways to run the stack: **Docker (recommended for production-like environments)** or **local dev mode** (faster iteration).
+
+---
+
+### Option A — Docker (self-hosted, all services)
+
+#### Prerequisites
+
+- [Rancher Desktop](https://rancherdesktop.io/) or Docker Desktop
+- pnpm v10 (`npm install -g pnpm`)
+- Node.js ≥ 18 (for deploying Convex functions)
+
+#### 1. Install root dependencies
+
+```bash
+pnpm install
+```
+
+#### 2. Start the containers
+
+```bash
+pnpm backend:up
+# Starts: backend (port 3210), dashboard (port 6791), ui (port 5173)
+```
+
+Wait ~10 seconds for the backend to be healthy, then check:
+
+```
+http://localhost:6791   → Convex dashboard
+http://localhost:5173   → cs-mapper UI
+```
+
+#### 3. Generate the admin key (first run only)
+
+```bash
+pnpm backend:admin-key
+# Prints something like: convex-self-hosted|...
+```
+
+#### 4. Create `.env.local` at the project root
+
+```dotenv
+CONVEX_SELF_HOSTED_URL='http://127.0.0.1:3210'
+CONVEX_SELF_HOSTED_ADMIN_KEY='<paste the key from step 3>'
+```
+
+> If a `CONVEX_DEPLOYMENT` line exists from a previous cloud project, remove it.
+
+#### 5. Push your environment variables to the backend
+
+Fill in `.env.staging` or `.env.production` with your CS / Sphere / FedID credentials (see [Environment variables reference](#environment-variables-reference)), then:
+
+```bash
+pnpm env:staging       # or pnpm env:production
+```
+
+#### 6. Deploy the Convex functions
+
+```bash
+pnpm deploy
+# Compiles and pushes all convex/ functions to the self-hosted backend
+```
+
+The UI at `http://localhost:5173` is now fully operational.
+
+#### Rebuilding the UI after code changes
+
+```bash
+pnpm ui:build          # rebuilds the web/Dockerfile image
+pnpm backend:up        # restarts containers with the new image
+```
+
+#### Useful commands
+
+```bash
+pnpm backend:logs      # tail backend container logs
+pnpm backend:down      # stop all containers (data is preserved in convex-data volume)
+docker compose down -v # stop containers AND wipe all data (full reset)
+```
+
+---
+
+### Option B — Local dev mode
+
+#### Prerequisites
 
 - Node.js ≥ 18
 - pnpm v10 (`npm install -g pnpm`)
-- A Convex account and project (or local self-hosted instance)
 
-### 1. Install dependencies
-
-```bash
-# Root (Convex backend deps)
-pnpm install
-
-# Web frontend deps
-cd web && pnpm install
-```
-
-### 2. Start the Convex backend (local)
+#### 1. Install dependencies
 
 ```bash
-pnpm convex dev
+pnpm install           # root (Convex backend deps)
+cd web && pnpm install # web frontend deps
 ```
 
-On first run, Convex will prompt you with several options — choose **"Run a local Convex backend"**. This starts a fully local Convex backend and automatically generates the `.env.local` file with the correct URLs.
+#### 2. Start the Convex backend
 
-Convex watches the `convex/` folder and syncs changes in real-time.
+```bash
+pnpm convex:dev
+```
 
-### 3. Push environment variables to Convex
+On first run, choose **"Run a local Convex backend"**. Convex creates `.env.local` automatically and watches `convex/` for changes in real-time.
 
-Once `.env.staging` or `.env.production` is filled in:
+#### 3. Push environment variables
 
 ```bash
 pnpm env:staging       # reads .env.staging  → pushes vars to the local backend
 pnpm env:production    # reads .env.production → pushes vars to the local backend
 ```
 
-This runs `scripts/set-convex-env.mjs` which calls `npx convex env set` for each variable.
-
-### 4. Start the web frontend
+#### 4. Start the web frontend
 
 ```bash
-cd web
-pnpm dev
+pnpm ui:dev
 # → http://localhost:5173
 ```
 

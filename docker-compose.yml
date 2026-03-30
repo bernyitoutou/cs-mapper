@@ -1,0 +1,55 @@
+services:
+  backend:
+    image: ghcr.io/get-convex/convex-backend:latest
+    stop_grace_period: 10s
+    stop_signal: SIGINT
+    ports:
+      - "3210:3210"   # Convex backend API
+      - "3211:3211"   # HTTP actions (CONVEX_SITE_URL)
+    volumes:
+      - convex-data:/convex/data
+    environment:
+      - CONVEX_CLOUD_ORIGIN=http://127.0.0.1:3210
+      - CONVEX_SITE_ORIGIN=http://127.0.0.1:3211
+      - RUST_LOG=info
+      - DISABLE_BEACON=true
+      - DO_NOT_REQUIRE_SSL=true
+      - DOCUMENT_RETENTION_DELAY=172800
+      - DISABLE_METRICS_ENDPOINT=true
+      - APPLICATION_MAX_CONCURRENT_MUTATIONS=16
+      - APPLICATION_MAX_CONCURRENT_NODE_ACTIONS=16
+      - APPLICATION_MAX_CONCURRENT_QUERIES=16
+      - APPLICATION_MAX_CONCURRENT_V8_ACTIONS=16
+    healthcheck:
+      test: curl -f http://localhost:3210/version
+      interval: 5s
+      start_period: 10s
+
+  dashboard:
+    image: ghcr.io/get-convex/convex-dashboard:latest
+    stop_grace_period: 10s
+    stop_signal: SIGINT
+    ports:
+      - "6791:6791"
+    environment:
+      - NEXT_PUBLIC_DEPLOYMENT_URL=http://127.0.0.1:3210
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  ui:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+      args:
+        # Vite bakes this URL into the JS bundle at build time.
+        # The browser accesses the backend directly, so use localhost.
+        VITE_CONVEX_URL: http://localhost:3210
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  convex-data:
