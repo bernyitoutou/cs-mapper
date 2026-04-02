@@ -28,6 +28,7 @@ import type * as operations_cleanEntries from "../operations/cleanEntries.js";
 import type * as operations_deleteEntries from "../operations/deleteEntries.js";
 import type * as operations_dispatchScheduledJob from "../operations/dispatchScheduledJob.js";
 import type * as operations_enrichSportCategories from "../operations/enrichSportCategories.js";
+import type * as operations_fixLastSphereUpdateFormat from "../operations/fixLastSphereUpdateFormat.js";
 import type * as operations_generateMigrationReport from "../operations/generateMigrationReport.js";
 import type * as operations_generateSportGroupMapping from "../operations/generateSportGroupMapping.js";
 import type * as operations_massFieldUpdate from "../operations/massFieldUpdate.js";
@@ -69,6 +70,7 @@ declare const fullApi: ApiFromModules<{
   "operations/deleteEntries": typeof operations_deleteEntries;
   "operations/dispatchScheduledJob": typeof operations_dispatchScheduledJob;
   "operations/enrichSportCategories": typeof operations_enrichSportCategories;
+  "operations/fixLastSphereUpdateFormat": typeof operations_fixLastSphereUpdateFormat;
   "operations/generateMigrationReport": typeof operations_generateMigrationReport;
   "operations/generateSportGroupMapping": typeof operations_generateSportGroupMapping;
   "operations/massFieldUpdate": typeof operations_massFieldUpdate;
