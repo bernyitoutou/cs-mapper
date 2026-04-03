@@ -2,6 +2,16 @@ import { config } from "../config.js";
 import type { SportGroupLookup } from "../fedid/sportGroupLookup.js";
 import type { SphereContent } from "./types.js";
 
+function normalizeLastSphereUpdate(value?: string): string {
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toISOString();
+    }
+  }
+  return new Date().toISOString();
+}
+
 /**
  * Map a Sphere `how_to_chose` entry to a ContentStack `blog_post` payload.
  *
@@ -53,7 +63,7 @@ export function mapSphereToBlogPost(
     title: `${entry.title} ${entry.id}`,
     subtitle: entry.summary ?? "",
     sphere_id: entry.id,
-    last_sphere_update: entry.updated_at ?? new Date().toISOString(),
+    last_sphere_update: normalizeLastSphereUpdate(entry.updated_at),
     metadata: {
       title: entry.title,
       description: entry.meta_description ?? "",
