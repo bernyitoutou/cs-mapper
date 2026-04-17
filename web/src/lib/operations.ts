@@ -90,6 +90,34 @@ export const operations: OperationMeta[] = [
     ],
   },
   {
+    id: "generate-obsolete-image-report",
+    name: "Generate Obsolete Image Report",
+    description: "Scans articles linked from each UK category URL, probes their Pixl teaser image, and generates a report of obsolete 1x1 assets grouped by category URL.",
+    howItWorks: [
+      "Loads the category URLs stored in Convex sportCategories and fetches each category page through the Sphere renderer.",
+      "Extracts linked HTC article UUIDs, loads each article teaser image metadata, then probes the Pixl URL to read HTTP status and image dimensions.",
+      "Marks assets as obsolete when Pixl returns a 1x1 placeholder or an obsolete image response, then saves quick and detailed markdown reports in Convex.",
+    ],
+    dataSources: [
+      "Convex sportCategories for the category URLs and Sphere UUIDs.",
+      "Sphere renderer HTML for article discovery and teaser image metadata.",
+      "Pixl image responses to detect 1x1 obsolete assets.",
+    ],
+    route: "/operations/generate-obsolete-image-report",
+    icon: "🖼️",
+    logType: "generate_obsolete_image_report",
+    params: ["category url"],
+    paramsMeta: [
+      { name: "category url", desc: "Optional single category URL to scan. Leave on All categories to generate the report grouped across every stored category URL." },
+    ],
+    dependencies: [
+      {
+        id: "seed-sport-categories",
+        reason: "The report uses sportCategories as the source of category URLs and Sphere IDs.",
+      },
+    ],
+  },
+  {
     id: "sphere-import",
     name: "Import Blog Posts entries from Sphere articles",
     description: "Fetches published Sphere content filtered by sport IDs from Convex sportGroupMappings, maps each item into a blog_post payload, then creates, updates, or publishes the matching ContentStack entries.",
@@ -244,6 +272,30 @@ export const operations: OperationMeta[] = [
     params: ["locale"],
     paramsMeta: [
       { name: "locale", desc: "Locale used to fetch blog sport category entries and resolve sport groups from the referential API.", values: ["en-GB", "en-US", "fr-FR", "de-DE", "es-ES", "it-IT", "ja-JP", "zh-CN"] },
+    ],
+  },
+  {
+    id: "migrate-blog-sport-category-sports-field",
+    name: "Migrate Blog Sport Category Sports Field",
+    description: "Backfills the new sports array on blog_sport_category entries from the legacy sport_ddfs_id and is_sport_group fields, while optionally clearing those legacy fields after the copy.",
+    howItWorks: [
+      "Loads all managed blog_sport_category entries for the selected locale from ContentStack.",
+      "Builds one sports item from the legacy sport_ddfs_id and is_sport_group values and appends it only when that exact object is not already present.",
+      "Preserves existing valid sports items, supports dry-run previews, and can optionally publish the updated entries and clear the legacy fields once downstream scripts are ready.",
+    ],
+    dataSources: [
+      "ContentStack managed blog_sport_category entries for the chosen locale.",
+      "Existing legacy fields sport_ddfs_id and is_sport_group on each entry.",
+    ],
+    route: "/operations/migrate-blog-sport-category-sports-field",
+    icon: "🧬",
+    logType: "migrateBlogSportCategorySportsField",
+    params: ["locale", "dry run", "publish", "clear legacy fields"],
+    paramsMeta: [
+      { name: "locale", desc: "Locale whose blog_sport_category entries will be inspected and updated.", values: ["en-GB", "en-US", "fr-FR", "de-DE", "es-ES", "it-IT", "ja-JP", "zh-CN"] },
+      { name: "dry run", desc: "When on, shows which entries would be updated without writing anything to ContentStack.", values: ["on → audit only", "off → live write"] },
+      { name: "publish", desc: "When on, re-publishes each updated localized entry after the sports array is written.", values: ["on → publish updated entries", "off → leave unpublished changes"] },
+      { name: "clear legacy fields", desc: "Optional cleanup step. When on during a live run, clears sport_ddfs_id and is_sport_group after copying them into sports.", values: ["off → keep legacy fields", "on → clear legacy fields"] },
     ],
   },/** 
   {

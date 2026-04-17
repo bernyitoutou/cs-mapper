@@ -18,6 +18,7 @@ The Convex backend exposes a set of **operations** (Node.js actions) that can be
 | `sphereImport` | Main import pipeline: fetches Sphere articles, maps them to CS `blog_post` entries, creates/updates and publishes them |
 | `syncUKCategoryTaxonomies` | Assigns `sport_category` taxonomy terms to CS blog posts; creates missing entries from Sphere |
 | `generateMigrationReport` | Produces a per-category markdown migration report (coverage rate, synced/missing counts) |
+| `migrateBlogSportCategorySportsField` | Backfills `blog_sport_category.sports[]` from legacy `sport_ddfs_id` and `is_sport_group`, with optional legacy-field cleanup |
 | `checkSyncStatus` | Compares published items between a Sphere content type and a CS content type |
 | `massFieldUpdate` | Sets a field to a given value across all entries of a CS content type |
 | `massImport` | Bulk-creates CS entries from a payload array, with optional publish |

@@ -8,6 +8,13 @@ export function RecentReports() {
 
   const recent = reports?.slice(0, 3) ?? [];
 
+  function reportRoute(name: string, id: string) {
+    if (name.startsWith("obsolete-images")) {
+      return `/operations/generate-obsolete-image-report?reportId=${id}`;
+    }
+    return `/operations/generate-migration-report?reportId=${id}`;
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
@@ -28,7 +35,7 @@ export function RecentReports() {
         {recent.map((r: { _id: string; name: string; generatedAt: number; locale: string }) => (
           <button
             key={r._id}
-            onClick={() => navigate(`/operations/generate-migration-report?reportId=${r._id}`)}
+            onClick={() => navigate(reportRoute(r.name, r._id))}
             className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-left hover:bg-surface transition-colors cursor-pointer"
           >
             <span className="text-xs">📄</span>

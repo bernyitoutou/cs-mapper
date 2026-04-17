@@ -30,9 +30,11 @@ import type * as operations_dispatchScheduledJob from "../operations/dispatchSch
 import type * as operations_enrichSportCategories from "../operations/enrichSportCategories.js";
 import type * as operations_fixLastSphereUpdateFormat from "../operations/fixLastSphereUpdateFormat.js";
 import type * as operations_generateMigrationReport from "../operations/generateMigrationReport.js";
+import type * as operations_generateObsoleteImageReport from "../operations/generateObsoleteImageReport.js";
 import type * as operations_generateSportGroupMapping from "../operations/generateSportGroupMapping.js";
 import type * as operations_massFieldUpdate from "../operations/massFieldUpdate.js";
 import type * as operations_massImport from "../operations/massImport.js";
+import type * as operations_migrateBlogSportCategorySportsField from "../operations/migrateBlogSportCategorySportsField.js";
 import type * as operations_seedSportCategories from "../operations/seedSportCategories.js";
 import type * as operations_sphereImport from "../operations/sphereImport.js";
 import type * as operations_syncUKCategoryTaxonomies from "../operations/syncUKCategoryTaxonomies.js";
@@ -72,9 +74,11 @@ declare const fullApi: ApiFromModules<{
   "operations/enrichSportCategories": typeof operations_enrichSportCategories;
   "operations/fixLastSphereUpdateFormat": typeof operations_fixLastSphereUpdateFormat;
   "operations/generateMigrationReport": typeof operations_generateMigrationReport;
+  "operations/generateObsoleteImageReport": typeof operations_generateObsoleteImageReport;
   "operations/generateSportGroupMapping": typeof operations_generateSportGroupMapping;
   "operations/massFieldUpdate": typeof operations_massFieldUpdate;
   "operations/massImport": typeof operations_massImport;
+  "operations/migrateBlogSportCategorySportsField": typeof operations_migrateBlogSportCategorySportsField;
   "operations/seedSportCategories": typeof operations_seedSportCategories;
   "operations/sphereImport": typeof operations_sphereImport;
   "operations/syncUKCategoryTaxonomies": typeof operations_syncUKCategoryTaxonomies;
